@@ -15,6 +15,14 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <cstdlib>
 #include "random.h"
 
+double error(double * av, double * av2, int n){
+    if(n == 0){
+        return 0;
+    } else {
+        return (sqrt(av2[n] - pow(av[n],2))/n);
+    }
+}
+
 using namespace std;
  
 int main (int argc, char *argv[]){
@@ -24,6 +32,7 @@ int main (int argc, char *argv[]){
    int N = 100; //Number of blocks
    int L = M/N; //Number of throws per block
    double ave[N], ave2[N]; //Arrays for storing the average and the square of the average for each block
+   double sum_prog[N], sum2_prog[N], err_prog[N];
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
@@ -54,6 +63,26 @@ int main (int argc, char *argv[]){
        ave[i] = double(sum/L);
        ave2[i] = double(pow(ave[i], 2));
    }
+   for(int k=0; k<N; k++){
+       for(int l=0; l<k+1; l++){
+           sum_prog[k] += ave[l];
+           sum2_prog[k] += ave2[l];
+       }
+       sum_prog[k] /= (k+1); //Cumulative average
+       sum2_prog[k] /= (k+1); //Cumulative square average
+       err_prog[k] = error(sum_prog, sum2_prog, k); //Statistical uncertainty
+   }
+
+    ofstream WriteResults;
+    WriteResults.open("results.txt");
+    if (WriteResults.is_open()){
+        WriteResults << "CUMULATIVE AVERAGE" << " " << "STATISTICAL UNCERTAINTY" << " " << "\n" << endl;
+        for(int i=0; i<N; i++){
+            WriteResults << sum_prog[i] << "             " << err_prog[i] << " " << "\n" << endl;
+        }
+    } else cerr << "PROBLEM: Unable to open random.out" << endl;
+    WriteResults.close();
+
    rnd.SaveSeed();
    return 0;
 }
