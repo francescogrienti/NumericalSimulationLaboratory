@@ -54,14 +54,15 @@ int main (int argc, char *argv[]){
       input.close();
    } else cerr << "PROBLEM: Unable to open seed.in" << endl;
 
+   //Block of code for the evaluation of the mean
    for(int i=0; i<N; i++){
        double sum = 0.;
        for(int j=0; j<L; j++){
            double r = rnd.Rannyu();
            sum += r;
        }
-       ave[i] = double(sum/L);
-       ave2[i] = double(pow(ave[i], 2));
+       ave[i] = double(sum/L); //Store average values for each block
+       ave2[i] = double(pow(ave[i], 2)); //Store square of the average for each block
    }
    for(int k=0; k<N; k++){
        for(int l=0; l<k+1; l++){
@@ -73,15 +74,43 @@ int main (int argc, char *argv[]){
        err_prog[k] = error(sum_prog, sum2_prog, k); //Statistical uncertainty
    }
 
-    ofstream WriteResults;
-    WriteResults.open("results.txt");
-    if (WriteResults.is_open()){
-        WriteResults << "CUMULATIVE AVERAGE" << " " << "STATISTICAL UNCERTAINTY" << " " << "\n" << endl;
+    ofstream WriteResults1;
+    WriteResults1.open("results_1.dat");
+    if (WriteResults1.is_open()){
         for(int i=0; i<N; i++){
-            WriteResults << sum_prog[i] << "             " << err_prog[i] << " " << "\n" << endl;
+            WriteResults1 << sum_prog[i] << " " << err_prog[i] << " " << "\n" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
-    WriteResults.close();
+    WriteResults1.close();
+
+    //Block of code for the evaluation of the standard deviation
+    for(int i=0; i<N; i++){
+        double sum = 0.;
+        for(int j=0; j<L; j++){
+            double r = rnd.Rannyu();
+            sum += pow(r-0.5, 2);
+        }
+        ave[i] = double(sum/L); //Store average values of the standard deviation for each block
+        ave2[i] = double(pow(ave[i], 2)); //Store square of the average of the standard deviation for each block
+    }
+    for(int k=0; k<N; k++){
+        for(int l=0; l<k+1; l++){
+            sum_prog[k] += ave[l];
+            sum2_prog[k] += ave2[l];
+        }
+        sum_prog[k] /= (k+1); //Cumulative average of the standard deviation
+        sum2_prog[k] /= (k+1); //Cumulative square average of the standard deviation
+        err_prog[k] = error(sum_prog, sum2_prog, k); //Statistical uncertainty
+    }
+
+    ofstream WriteResults2;
+    WriteResults2.open("results_2.dat");
+    if (WriteResults2.is_open()){
+        for(int i=0; i<N; i++){
+            WriteResults2 << sum_prog[i] << " " << err_prog[i] << " " << "\n" << endl;
+        }
+    } else cerr << "PROBLEM: Unable to open random.out" << endl;
+    WriteResults2.close();
 
    rnd.SaveSeed();
    return 0;
