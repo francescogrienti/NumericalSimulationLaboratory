@@ -12,14 +12,13 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <fstream>
 #include <string>
 #include <cmath>
-#include <cstdlib>
 #include "random.h"
 
 double error(double * av, double * av2, int n){
     if(n == 0){
         return 0;
     } else {
-        return (sqrt(av2[n] - pow(av[n],2))/n);
+        return sqrt(av2[n] - pow(av[n],2))/(sqrt(n));
     }
 }
 
@@ -33,6 +32,7 @@ int main (int argc, char *argv[]){
    int L = M/N; //Number of throws per block
    double ave[N], ave2[N]; //Arrays for storing the average and the square of the average for each block
    double sum_prog[N], sum2_prog[N], err_prog[N];
+   double mu = 0.5;
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
@@ -78,7 +78,7 @@ int main (int argc, char *argv[]){
     WriteResults1.open("results_1.dat");
     if (WriteResults1.is_open()){
         for(int i=0; i<N; i++){
-            WriteResults1 << sum_prog[i] << " " << err_prog[i] << " " << "\n" << endl;
+            WriteResults1 << sum_prog[i] << " " <<  err_prog[i] << " " << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults1.close();
@@ -88,12 +88,15 @@ int main (int argc, char *argv[]){
         double sum = 0.;
         for(int j=0; j<L; j++){
             double r = rnd.Rannyu();
-            sum += pow(r-0.5, 2);
+            sum += pow(r-mu, 2);
         }
-        ave[i] = double(sum/L); //Store average values of the standard deviation for each block
-        ave2[i] = double(pow(ave[i], 2)); //Store square of the average of the standard deviation for each block
+        ave[i] = sum/L; //Store average values of the standard deviation for each block
+        ave2[i] = pow(ave[i], 2); //Store square of the average of the standard deviation for each block
     }
+
     for(int k=0; k<N; k++){
+        sum_prog[k] = 0.;
+        sum2_prog[k] = 0.;
         for(int l=0; l<k+1; l++){
             sum_prog[k] += ave[l];
             sum2_prog[k] += ave2[l];
@@ -107,10 +110,44 @@ int main (int argc, char *argv[]){
     WriteResults2.open("results_2.dat");
     if (WriteResults2.is_open()){
         for(int i=0; i<N; i++){
-            WriteResults2 << sum_prog[i] << " " << err_prog[i] << " " << "\n" << endl;
+            WriteResults2 << sum_prog[i] << " " << err_prog[i] << " " << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults2.close();
+
+    //Chi-2
+    M = 100; //Number of sub-intervals of [0,1)
+    int n = 10000; //Number of throws
+    int expec_value = n/M;
+    double chi_2[M];
+    int count[M];
+
+    for(int j=0; j<M; j++){
+        chi_2[j] = 0;
+        count[j] = 0;
+    }
+
+    for(int i=0; i<M; i++) {
+        for (int k=0; k<n; k++) {
+            double r = rnd.Rannyu();
+            int index = (int) (r * 100);
+            count[index] += 1;
+        }
+
+        for (int j=0; j<M; j++) {
+            chi_2[j] += double(pow(count[j]-expec_value, 2))/(double)(expec_value);
+            count[j] = 0;
+        }
+    }
+
+    ofstream WriteResults3;
+    WriteResults3.open("results_3.dat");
+    if (WriteResults3.is_open()){
+        for(int i=0; i<M; i++){
+            WriteResults3 << chi_2[i] << "\t" << endl;
+        }
+    } else cerr << "PROBLEM: Unable to open random.out" << endl;
+    WriteResults3.close();
 
    rnd.SaveSeed();
    return 0;
