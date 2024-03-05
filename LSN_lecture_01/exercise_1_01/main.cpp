@@ -30,8 +30,11 @@ int main (int argc, char *argv[]){
    int M = 100000; //Number of total throws
    int N = 100; //Number of blocks
    int L = M/N; //Number of throws per block
-   double ave[N], ave2[N]; //Arrays for storing the average and the square of the average for each block
-   double sum_prog[N], sum2_prog[N], err_prog[N];
+   double * ave = new double[N]{0}; //Arrays for storing the average and the square of the average for each block
+   double * ave2 = new double[N]{0}; //Arrays for storing the average and the square of the average for each block
+   double * sum_prog = new double[N]{0};
+   double * sum2_prog = new double[N]{0};
+   double * err_prog = new double[N]{0};
    double mu = 0.5;
    int seed[4];
    int p1, p2;
@@ -65,6 +68,8 @@ int main (int argc, char *argv[]){
        ave2[i] = double(pow(ave[i], 2)); //Store square of the average for each block
    }
    for(int k=0; k<N; k++){
+       sum_prog[k] = 0.;
+       sum2_prog[k] = 0.;
        for(int l=0; l<k+1; l++){
            sum_prog[k] += ave[l];
            sum2_prog[k] += ave2[l];
@@ -119,21 +124,14 @@ int main (int argc, char *argv[]){
     M = 100; //Number of sub-intervals of [0,1)
     int n = 10000; //Number of throws
     int expec_value = n/M;
-    double chi_2[M];
-    int count[M];
-
-    for(int j=0; j<M; j++){
-        chi_2[j] = 0;
-        count[j] = 0;
-    }
+    double * chi_2 = new double[M]{0};
+    int * count = new int[M]{0};
 
     for(int i=0; i<M; i++) {
         for (int k=0; k<n; k++) {
             double r = rnd.Rannyu();
-            int index = (int) (r * 100);
-            count[index] += 1;
+            count[(int) (r * 100)] += 1;
         }
-
         for (int j=0; j<M; j++) {
             chi_2[j] += double(pow(count[j]-expec_value, 2))/(double)(expec_value);
             count[j] = 0;
