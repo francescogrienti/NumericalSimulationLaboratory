@@ -41,6 +41,18 @@ double Random :: Gauss(double mean, double sigma) {
    return mean + x * sigma;
 }
 
+double Random :: Expon(double lambda) {
+    // This function generates a random number from an exponential distribution
+    double y = Rannyu();
+    return (-1./lambda)* log(1-y);
+}
+
+double Random ::CauchyLorentz(double mean, double gamma){
+    // This function generates a random number from a Cauchy-Lorentz distribution
+    double y = Rannyu();
+    return gamma*tan(M_PI*(y-0.5)) + mean;
+}
+
 double Random :: Rannyu(double min, double max){
    // This function generates a random number in the range [min, max)
    return min+(max-min)*Rannyu();

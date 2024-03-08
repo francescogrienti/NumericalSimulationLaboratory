@@ -34,6 +34,8 @@ public:
   double Rannyu(double min, double max);
   // Method to generate a random number with a Gaussian distribution
   double Gauss(double mean, double sigma);
+  double Expon(double lambda);
+  double CauchyLorentz(double mean, double gamma);
 };
 
 #endif // __Random__
