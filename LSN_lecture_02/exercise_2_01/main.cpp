@@ -22,8 +22,16 @@ double error(double * av, double * av2, int n){
     }
 }
 
-double func(double x){
+double func_f(double x){
     return (M_PI/2)*cos((M_PI/2)*x);
+}
+
+double prob_p(double x){
+    return (3/2)*(1-pow(x,2));
+}
+
+double func_g(double x){
+    return ((M_PI/3)*cos((M_PI/2)*x))/(1-pow(x,2));
 }
 
 using namespace std;
@@ -61,14 +69,14 @@ int main (int argc, char *argv[]){
       input.close();
    } else cerr << "PROBLEM: Unable to open seed.in" << endl;
 
-    //Block of code for the evaluation of the mean
+    //Sampling a uniform probability distribution in [0,1]
     for(int i=0; i<N; i++){
         double sum1 = 0.;
         for(int j=0; j<L; j++){
             double sum2 = 0.;
             for(int k=0; k<N; k++){
                 double r = rnd.Rannyu();
-                sum2 += func(r);
+                sum2 += func_f(r);
             }
             mean_integral[j] = sum2/N;
             sum1 += mean_integral[j];
@@ -98,8 +106,53 @@ int main (int argc, char *argv[]){
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults1.close();
 
-   rnd.SaveSeed();
-   return 0;
+    // Importance sampling - sampling a non-uniform probability distribution in [0,1]
+    // using the accept-reject method for sampling the distribution
+    for(int i=0; i<N; i++){
+        double sum1 = 0.;
+        for(int j=0; j<L; j++){
+            double sum2 = 0.;
+            for(int k=0; k<N; k++){
+                double r = 0.;
+                double t = 0.;
+                do{
+                    r = rnd.Rannyu();
+                    t = rnd.Rannyu(0,1);
+                } while (r >= prob_p(t)/(3/2));
+                    sum2 += func_g(t);
+                }
+            mean_integral[j] = sum2/N;
+            sum1 += mean_integral[j];
+            mean_integral[j] = 0;
+            }
+        ave[i] = double(sum1/L); //Store average values for each block
+        ave2[i] = double(pow(ave[i], 2)); //Store square of the average for each block
+        }
+
+
+    for(int k=0; k<N; k++){
+        sum_prog[k] = 0.;
+        sum2_prog[k] = 0.;
+        for(int l=0; l<k+1; l++){
+            sum_prog[k] += ave[l];
+            sum2_prog[k] += ave2[l];
+        }
+        sum_prog[k] /= (k+1); //Cumulative average
+        sum2_prog[k] /= (k+1); //Cumulative square average
+        err_prog[k] = error(sum_prog, sum2_prog, k); //Statistical uncertainty
+    }
+
+    ofstream WriteResults2;
+    WriteResults2.open("results_2.dat");
+    if (WriteResults2.is_open()){
+        for(int i=0; i<N; i++){
+            WriteResults2 << sum_prog[i] << " " <<  err_prog[i] << " " << "\t" << endl;
+        }
+    } else cerr << "PROBLEM: Unable to open random.out" << endl;
+    WriteResults2.close();
+
+    rnd.SaveSeed();
+    return 0;
 }
 
 /****************************************************************
