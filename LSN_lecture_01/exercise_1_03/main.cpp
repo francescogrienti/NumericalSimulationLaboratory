@@ -31,7 +31,7 @@ int main (int argc, char *argv[]){
    int N = 100; //Blocks
    int L = N_experim/N; //Throws per block
    double l = 1.; //Length of the needle
-   double d = 3.; //Spacing among lines
+   double d = 2.; //Spacing among lines
    int N_hit = 0;
     double * ave = new double[N]{0}; //Arrays for storing the average and the square of the average for each block
     double * ave2 = new double[N]{0}; //Arrays for storing the average and the square of the average for each block
@@ -63,17 +63,14 @@ int main (int argc, char *argv[]){
     for(int i=0; i<N; i++){
         N_hit = 0;
         for(int j=0; j<L; j++){
-            double x1 = 0.;
+            double y1 = rnd.Rannyu(-d,+d);
+            double x1 = rnd.Rannyu(-d,+d);
             double x2 = 0.;
-            double y1 = 0.;
-            double y2 = 0.;
+            double y2 = 0;
             do {
-                y1 = rnd.Rannyu(0,2*d);
-                y2 = rnd.Rannyu(0,2*d);
-                x1 = rnd.Rannyu(0,2*d);
-                x2 = rnd.Rannyu(0,2*d);
-
-            } while(l != sqrt(pow(x1-x2,2)+pow(y1-y2,2)));
+                double y2 = rnd.Rannyu(-d,d);
+                double x2 = rnd.Rannyu(-d,d);
+            } while(l < sqrt(pow(x1-x2,2)+pow(y1-y2,2)));
             if(((0<x1 && x1<d) && (d<x2 && x2<2*d)) || ((0<x2 && x2<d) && (d<x1 && x1<2*d))){
                 N_hit += 1;
             } else if (((0>x1 && x1>(-1)*d) && (0<x2 && x2<d)) || ((0>x2 && x2>(-1)*d) && (0<x1 && x1<d))){

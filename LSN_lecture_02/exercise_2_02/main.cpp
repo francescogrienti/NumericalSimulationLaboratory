@@ -24,8 +24,15 @@ int main (int argc, char *argv[]){
    int N = 100; //Number of blocks
    int L = M/N; //Number of throws per block;
    double a = 1.; //Lattice step
-   double *sum = new double[N]{0};
-   int *count = new int[n]{0};
+   double *sum_d = new double[N]{0.};
+   double *sum_c = new double[N]{0.};
+   double *sum_err_d = new double[N]{0.};
+   double *sum_err_c = new double[N]{0.};
+   double *err_d = new double[N]{0.};
+   double *err_c = new double[N]{0.};
+   //double *err = new double[N]{0.};
+   int *count_d = new int[n]{0};
+   double *count_c = new double[n]{0};
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
@@ -48,34 +55,67 @@ int main (int argc, char *argv[]){
    } else cerr << "PROBLEM: Unable to open seed.in" << endl;
 
    //Discrete case
-   for(int j=0; j<N; j++){
-       for(int i=0; i<L; i++){
-           double r = rnd.Rannyu(-1,1);
-           if(r<0){
-               count[(int) ((-1)*r * n)] -= a;
-           } else if (r>0){
-               count[(int) (r * n)] += a;
-           }
-           sum[i] = sqrt(pow(count[n-3],2)+pow(count[n-2],2)+pow(count[n-1],2));
-       }
-       count[n] = {0};
-   }
-
    for(int k=0; k<N; k++){
-       sum[k] /= N;
-       cout << sum[k] << endl;
+       for(int j=0; j<N; j++){
+           count_d[0] = 0;
+           count_d[1] = 0;
+           count_d[2] = 0;
+           for(int i=0; i<L; i++){
+               double r = rnd.Rannyu(-1,1);
+               if(r<0){
+                   count_d[(int) ((-1)*r * n)] -= a;
+               } else if (r>0){
+                   count_d[(int) (r * n)] += a;
+               }
+               sum_d[i] += (pow(count_d[0],2)+pow(count_d[1],2)+pow(count_d[2],2));
+               //sum_err_d[i] += pow((pow(count_d[0],2)+pow(count_d[1],2)+pow(count_d[2],2)),2);
+           }
+       }
+   }
+   for(int k=0; k<N; k++){
+       sum_d[k] = sqrt(sum_d[k]/N);
+       //err_d[k] = sqrt(((sum_err_d[k]/N)-pow(sum_d[k],2))/N);
    }
 
     ofstream WriteResults1;
     WriteResults1.open("results_1.dat");
     if (WriteResults1.is_open()){
         for(int i=0; i<N; i++){
-            WriteResults1 << sum[i] << "\t" << endl;
+            WriteResults1 << sum_d[i] << " " << err_d[i] << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults1.close();
-   //Continuum case
 
+    //Continuum case
+    for(int k=0; k<N; k++){
+        for(int j=0; j<N; j++){
+            count_c[0] = 0.;
+            count_c[1] = 0.;
+            count_c[2] = 0.;
+            for(int i=0; i<L; i++){
+                double theta = rnd.Rannyu(0,M_PI);
+                double phi = rnd.Rannyu(0, 2*M_PI);
+                count_c[0] += sin(theta)*sin(phi);
+                count_c[1] += sin(theta)*cos(phi);
+                count_c[2] += cos(theta);
+                sum_c[i] += (pow(count_c[0],2)+pow(count_c[1],2)+pow(count_c[2],2));
+                //sum_err_c[i] += pow((pow(count_c[0],2)+pow(count_c[1],2)+pow(count_c[2],2)),2);
+            }
+        }
+    }
+
+    for(int k=0; k<N; k++){
+        sum_c[k] = sqrt(sum_c[k]/N);
+        //err_c[k] = sqrt(((sum_err_c[k]/N)-pow(sum_c[k],2))/N);
+    }
+    ofstream WriteResults2;
+    WriteResults2.open("results_2.dat");
+    if (WriteResults2.is_open()){
+        for(int i=0; i<N; i++){
+            WriteResults2 << sum_c[i] << " " << err_c[i] << "\t" << endl;
+        }
+    } else cerr << "PROBLEM: Unable to open random.out" << endl;
+    WriteResults2.close();
 
    rnd.SaveSeed();
    return 0;
