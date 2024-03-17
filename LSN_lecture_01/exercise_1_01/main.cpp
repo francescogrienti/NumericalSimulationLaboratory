@@ -13,30 +13,20 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <string>
 #include <cmath>
 #include <vector>
+#include <tuple>
 #include "random.h"
+#include "functions.h"
 
 using namespace std;
-
-double error(vector<double> av, vector<double> av2, int n) {
-    if (n == 0) {
-        return 0;
-    } else {
-        return sqrt(av2[n] - pow(av[n], 2)) / (sqrt(n));
-    }
-}
 
 int main(int argc, char *argv[]) {
 
     Random rnd;
     int M = 100000; //Number of total throws
     int N = 100; //Number of blocks
-    int L = M / N; //Number of throws per block
-    double mu = 0.5;
-    vector<double> ave(N, 0.); //Arrays for storing the average and the square of the average for each block
-    vector<double> ave2(N, 0.); //Arrays for storing the average and the square of the average for each block
-    vector<double> sumProg(N, 0.);
-    vector<double> sum2Prog(N, 0.);
-    vector<double> errProg(N, 0.);
+    double mu = 0.5; //Expected mean
+    tuple<vector<double>, vector<double>> averages;
+    tuple<vector<double>, vector<double>, vector<double>> cumulatives;
     int seed[4];
     int p1, p2;
     ifstream Primes("Primes");
@@ -58,68 +48,15 @@ int main(int argc, char *argv[]) {
         input.close();
     } else cerr << "PROBLEM: Unable to open seed.in" << endl;
 
-    //Block of code for the evaluation of the mean
-    for (int i = 0; i < N; i++) {
-        double sum = 0.;
-        for (int j = 0; j < L; j++) {
-            double r = rnd.Rannyu();
-            sum += r;
-        }
-        ave[i] = double(sum / L); //Store average values for each block
-        ave2[i] = double(pow(ave[i], 2)); //Store square of the average for each block
-    }
-    for (int k = 0; k < N; k++) {
-        sumProg[k] = 0.;
-        sum2Prog[k] = 0.;
-        for (int l = 0; l < k + 1; l++) {
-            sumProg[k] += ave[l];
-            sum2Prog[k] += ave2[l];
-        }
-        sumProg[k] /= (k + 1); //Cumulative average
-        sum2Prog[k] /= (k + 1); //Cumulative square average
-        errProg[k] = error(sumProg, sum2Prog, k); //Statistical uncertainty
-    }
+    //Evaluation of the mean
+    averages = mean(M, N, rnd);
+    cumulatives = cumulativeAverage(get<0> (averages), get<1> (averages));
+    writeOnFile(get<0> (cumulatives), get<2> (cumulatives), "results_1.dat");
 
-    ofstream WriteResults1;
-    WriteResults1.open("results_1.dat");
-    if (WriteResults1.is_open()) {
-        for (int i = 0; i < N; i++) {
-            WriteResults1 << sumProg[i] << " " << errProg[i] << " " << "\t" << endl;
-        }
-    } else cerr << "PROBLEM: Unable to open random.out" << endl;
-    WriteResults1.close();
-
-    //Block of code for the evaluation of the standard deviation
-    for (int i = 0; i < N; i++) {
-        double sum = 0.;
-        for (int j = 0; j < L; j++) {
-            double r = rnd.Rannyu();
-            sum += pow(r - mu, 2);
-        }
-        ave[i] = sum / L; //Store average values of the standard deviation for each block
-        ave2[i] = pow(ave[i], 2); //Store square of the average of the standard deviation for each block
-    }
-
-    for (int k = 0; k < N; k++) {
-        sumProg[k] = 0.;
-        sum2Prog[k] = 0.;
-        for (int l = 0; l < k + 1; l++) {
-            sumProg[k] += ave[l];
-            sum2Prog[k] += ave2[l];
-        }
-        sumProg[k] /= (k + 1); //Cumulative average of the standard deviation
-        sum2Prog[k] /= (k + 1); //Cumulative square average of the standard deviation
-        errProg[k] = error(sumProg, sum2Prog, k); //Statistical uncertainty
-    }
-
-    ofstream WriteResults2;
-    WriteResults2.open("results_2.dat");
-    if (WriteResults2.is_open()) {
-        for (int i = 0; i < N; i++) {
-            WriteResults2 << sumProg[i] << " " << errProg[i] << " " << "\t" << endl;
-        }
-    } else cerr << "PROBLEM: Unable to open random.out" << endl;
-    WriteResults2.close();
+    //Evaluation of the standard deviation
+    averages = mean(M, N, rnd, mu);
+    cumulatives = cumulativeAverage(get<0> (averages), get<1> (averages));
+    writeOnFile(get<0> (cumulatives), get<2> (cumulatives), "results_2.dat");
 
     //Chi-2
     int subI = 100; //Number of sub-intervals of [0,1)
@@ -139,14 +76,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    ofstream WriteResults3;
-    WriteResults3.open("results_3.dat");
-    if (WriteResults3.is_open()) {
-        for (int i = 0; i < subI; i++) {
-            WriteResults3 << chi2[i] << "\t" << endl;
-        }
-    } else cerr << "PROBLEM: Unable to open random.out" << endl;
-    WriteResults3.close();
+    writeOnFile(chi2, "results_3.dat");
 
     rnd.SaveSeed();
     return 0;
