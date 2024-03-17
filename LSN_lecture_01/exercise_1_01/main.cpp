@@ -23,10 +23,10 @@ int main(int argc, char *argv[]) {
 
     //Variables declaration
     Random rnd;
-    int M = 100000; //Number of total throws
-    int N = 100; //Number of blocks
-    double mu = 0.5; //Expected mean
-    int expecValue = M / N;
+    const int M = 100000; //Number of total throws
+    const int N = 100; //Number of blocks
+    const double mu = 0.5; //Expected mean
+    const int expecValue = M / N;
     tuple<vector<double>, vector<double>> averages;
     tuple<vector<double>, vector<double>, vector<double>> cumulatives;
     vector<double> chi2(N, 0.);
