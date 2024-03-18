@@ -19,6 +19,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+    //Variables declaration
     Random rnd;
     const int M = 1000000;
     const vector<int> N = {1, 2, 10, 100};
@@ -27,6 +28,8 @@ int main(int argc, char *argv[]) {
     const double gamma = 1.;
     int seed[4];
     int p1, p2;
+
+    //Functions
     ifstream Primes("Primes");
     if (Primes.is_open()) {
         Primes >> p1 >> p2;

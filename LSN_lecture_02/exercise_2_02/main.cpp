@@ -27,8 +27,6 @@ int main(int argc, char *argv[]) {
     double a = 1.; //Lattice step
     double *sum_d = new double[N]{0.};
     double *sum_c = new double[N]{0.};
-    double *sum_err_d = new double[N]{0.};
-    double *sum_err_c = new double[N]{0.};
     vector<vector<double>> err_d(M, vector<double>(N, 0.));
     vector<vector<double>> err_c(M, vector<double>(N, 0.));
     double *error_d = new double[N]{0.};
@@ -70,27 +68,19 @@ int main(int argc, char *argv[]) {
                     count_d[(int) (r * n)] += a;
                 }
                 sum_d[i] += (pow(count_d[0], 2) + pow(count_d[1], 2) + pow(count_d[2], 2));
-                err_d[j + k * N][i] = (pow(count_d[0], 2) + pow(count_d[1], 2) + pow(count_d[2], 2));
+                //err_d[j + k * N][i] = (pow(count_d[0], 2) + pow(count_d[1], 2) + pow(count_d[2], 2));
             }
         }
     }
     for (int k = 0; k < N; k++) {
-        sum_d[k] = sqrt(sum_d[k] / M);
-    }
-
-    for (int i = 0; i < N; i++) {
-        double somma = 0.;
-        for (int k = 0; k < M; k++) {
-            somma += pow((sqrt(err_d[k][i]) - sum_d[i]), 2);
-        }
-        error_d[i] = sqrt(somma / M);
+        error_d[k] = sqrt((pow((sum_d[k] / M), 2) - (sum_d[k] / M)) / (M));
     }
 
     ofstream WriteResults1;
     WriteResults1.open("results_1.dat");
     if (WriteResults1.is_open()) {
         for (int i = 0; i < N; i++) {
-            WriteResults1 << sum_d[i] << " " << error_d[i] << "\t" << endl;
+            WriteResults1 << sqrt(sum_d[i] / M) << " " << error_d[i] << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults1.close();
@@ -114,22 +104,13 @@ int main(int argc, char *argv[]) {
     }
 
     for (int k = 0; k < N; k++) {
-        sum_c[k] = sqrt(sum_c[k] / M);
+        error_c[k] = sqrt((pow(sum_c[k] / M, 2) - (sum_c[k] / M)) / (M));
     }
-
-    for (int i = 0; i < N; i++) {
-        double somma = 0.;
-        for (int k = 0; k < M; k++) {
-            somma += pow((err_c[k][i] - sum_c[i]), 2);
-        }
-        error_c[i] = sqrt(somma / M);
-    }
-
     ofstream WriteResults2;
     WriteResults2.open("results_2.dat");
     if (WriteResults2.is_open()) {
         for (int i = 0; i < N; i++) {
-            WriteResults2 << sum_c[i] << " " << error_c[i] << "\t" << endl;
+            WriteResults2 << sqrt(sum_c[i] / M) << " " << error_c[i] << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults2.close();
