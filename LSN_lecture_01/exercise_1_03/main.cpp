@@ -16,7 +16,7 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <vector>
 #include <tuple>
 
-double error(double *av, double *av2, int n) {
+double error(std::vector<double> av, std::vector<double> av2, int n) {
     if (n == 0) {
         return 0;
     } else {
@@ -29,14 +29,19 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
     Random rnd;
-    const int N_experim = 1000000; //Throws
+    const int M = 100000; //Throws
     const int N = 100; //Blocks
-    const int L = N_experim / N; //Throws per block
+    const int L = M / N; //Throws per block
     const double l = 1.; //Length of the needle
     const double d = 2.; //Spacing among lines
     int N_hit = 0;
-    tuple<vector < double>, vector < double >> averages;
-    tuple<vector < double>, vector < double >, vector < double >> cumulatives;
+    vector<double> ave(N, 0.);
+    vector<double> ave2(N, 0.);
+    vector<double> sum_prog(N, 0.);
+    vector<double> sum2_prog(N, 0.);
+    vector<double> err_prog(N, 0.);
+    //tuple<vector<double>, vector<double >> averages;
+    //tuple<vector<double>, vector<double>, vector<double >> cumulatives;
     int seed[4];
     int p1, p2;
     ifstream Primes("Primes");
@@ -62,24 +67,23 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < N; i++) {
         N_hit = 0;
         for (int j = 0; j < L; j++) {
-            double y1 = rnd.Rannyu(-d, +d);
-            double x1 = rnd.Rannyu(-d, +d);
+            double x1 = rnd.Rannyu(0, d);
             double x2 = 0.;
-            double y2 = 0;
+            double x = 0;
+            double y = 0.;
+            double angle = 0.;
             do {
-                double y2 = rnd.Rannyu(-d, d);
-                double x2 = rnd.Rannyu(-d, d);
-            } while (l < sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2)));
-            if (((0 < x1 && x1 < d) && (d < x2 && x2 < 2 * d)) || ((0 < x2 && x2 < d) && (d < x1 && x1 < 2 * d))) {
-                N_hit += 1;
-            } else if (((0 > x1 && x1 > (-1) * d) && (0 < x2 && x2 < d)) ||
-                       ((0 > x2 && x2 > (-1) * d) && (0 < x1 && x1 < d))) {
+                y = rnd.Rannyu(-1,1);
+                x = rnd.Rannyu(-1,1);
+            } while (pow(x, 2) + pow(y, 2) > 1.);
+            angle = atan(y/x);
+            x2 = x1 + l * cos(2 * angle);
+            if (x2 < 0 || x2 > d) {
                 N_hit += 1;
             }
+            ave[i] = (2.0 * l * L) / (N_hit * d); //Store average values for each block
+            ave2[i] = double(pow(ave[i], 2)); //Store square of the average for each block
         }
-        cout << N_hit << endl;
-        ave[i] = (2 * l * L) / (N_hit * d); //Store average values for each block
-        ave2[i] = double(pow(ave[i], 2)); //Store square of the average for each block
     }
 
     for (int k = 0; k < N; k++) {
