@@ -8,42 +8,42 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 *****************************************************************
 *****************************************************************/
 
-#ifndef __Random__
-#define __Random__
+#include <iostream>
+#include <fstream>
+#include <string>
+#include "random.h"
 
-// This class contains functions for generating random numbers using the RANNYU algorithm
-class Random {
+using namespace std;
+ 
+int main (int argc, char *argv[]){
 
-private:
-    int m1, m2, m3, m4, l1, l2, l3, l4, n1, n2, n3, n4;
+   Random rnd;
+   int N = 30;
+   int seed[4];
+   int p1, p2;
+   ifstream Primes("Primes");
+   if (Primes.is_open()){
+      Primes >> p1 >> p2 ;
+   } else cerr << "PROBLEM: Unable to open Primes" << endl;
+   Primes.close();
 
-protected:
+   ifstream input("seed.in");
+   string property;
+   if (input.is_open()){
+      while ( !input.eof() ){
+         input >> property;
+         if( property == "RANDOMSEED" ){
+            input >> seed[0] >> seed[1] >> seed[2] >> seed[3];
+            rnd.SetRandom(seed,p1,p2);
+         }
+      }
+      input.close();
+   } else cerr << "PROBLEM: Unable to open seed.in" << endl;
 
-public:
-    // Default constructor
-    Random();
 
-    // Destructor
-    ~Random();
-
-    // Method to set the seed for the RNG
-    void SetRandom(int *, int, int);
-
-    // Method to save the seed to a file
-    void SaveSeed();
-
-    // Method to generate a random number in the range [0,1)
-    double Rannyu(void);
-
-    // Method to generate a random number in the range [min,max)
-    double Rannyu(double min, double max);
-
-    // Method to generate a random number with a Gaussian distribution
-    double Gauss(double mean, double sigma);
-
-};
-
-#endif // __Random__
+   rnd.SaveSeed();
+   return 0;
+}
 
 /****************************************************************
 *****************************************************************

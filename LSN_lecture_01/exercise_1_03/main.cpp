@@ -13,16 +13,9 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <string>
 #include <cmath>
 #include "random.h"
+#include "functions.h"
 #include <vector>
 #include <tuple>
-
-double error(std::vector<double> av, std::vector<double> av2, int n) {
-    if (n == 0) {
-        return 0;
-    } else {
-        return sqrt(av2[n] - pow(av[n], 2)) / (sqrt(n));
-    }
-}
 
 using namespace std;
 
@@ -37,11 +30,7 @@ int main(int argc, char *argv[]) {
     int N_hit = 0;
     vector<double> ave(N, 0.);
     vector<double> ave2(N, 0.);
-    vector<double> sum_prog(N, 0.);
-    vector<double> sum2_prog(N, 0.);
-    vector<double> err_prog(N, 0.);
-    //tuple<vector<double>, vector<double >> averages;
-    //tuple<vector<double>, vector<double>, vector<double >> cumulatives;
+    tuple<vector<double>, vector<double>, vector<double >> cumulatives;
     int seed[4];
     int p1, p2;
     ifstream Primes("Primes");
@@ -63,20 +52,12 @@ int main(int argc, char *argv[]) {
         input.close();
     } else cerr << "PROBLEM: Unable to open seed.in" << endl;
 
-    //Block of code for the evaluation of the mean
     for (int i = 0; i < N; i++) {
         N_hit = 0;
         for (int j = 0; j < L; j++) {
             double x1 = rnd.Rannyu(0, d);
             double x2 = 0.;
-            double x = 0;
-            double y = 0.;
-            double angle = 0.;
-            do {
-                y = rnd.Rannyu(-1,1);
-                x = rnd.Rannyu(-1,1);
-            } while (pow(x, 2) + pow(y, 2) > 1.);
-            angle = atan(y/x);
+            double angle = rnd.Theta();
             x2 = x1 + l * cos(2 * angle);
             if (x2 < 0 || x2 > d) {
                 N_hit += 1;
@@ -86,26 +67,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    for (int k = 0; k < N; k++) {
-        sum_prog[k] = 0.;
-        sum2_prog[k] = 0.;
-        for (int l = 0; l < k + 1; l++) {
-            sum_prog[k] += ave[l];
-            sum2_prog[k] += ave2[l];
-        }
-        sum_prog[k] /= (k + 1); //Cumulative average
-        sum2_prog[k] /= (k + 1); //Cumulative square average
-        err_prog[k] = error(sum_prog, sum2_prog, k); //Statistical uncertainty
-    }
-
-    ofstream WriteResults1;
-    WriteResults1.open("results_1.dat");
-    if (WriteResults1.is_open()) {
-        for (int i = 0; i < N; i++) {
-            WriteResults1 << sum_prog[i] << " " << err_prog[i] << " " << "\t" << endl;
-        }
-    } else cerr << "PROBLEM: Unable to open random.out" << endl;
-    WriteResults1.close();
+    cumulatives = cumulativeAverage(ave, ave2);
+    writeOnFile(get<0>(cumulatives), get<2>(cumulatives), "results_1.dat");
     rnd.SaveSeed();
     return 0;
 }

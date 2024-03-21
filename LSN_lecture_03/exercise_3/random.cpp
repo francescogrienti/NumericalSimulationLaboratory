@@ -85,16 +85,6 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 }
 
-double Random::Theta() {
-    double x = 0;
-    double y = 0.;
-    do {
-        y = Rannyu(-1, 1);
-        x = Rannyu(-1, 1);
-    } while (pow(x, 2) + pow(y, 2) > 1.);
-    return atan(y / x);
-}
-
 /****************************************************************
 *****************************************************************
     _/    _/  _/_/_/  _/       Numerical Simulation Laboratory
