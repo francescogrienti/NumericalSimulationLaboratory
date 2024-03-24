@@ -8,9 +8,6 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 *****************************************************************
 *****************************************************************/
 
-#include <iostream>
-#include <fstream>
-#include <string>
 #include "random.h"
 #include "functions.h"
 #include "vector"
@@ -26,29 +23,11 @@ int main(int argc, char *argv[]) {
     const double lambda = 1.;
     const double mu = 0.;
     const double gamma = 1.;
-    int seed[4];
-    int p1, p2;
+    vector<int> seed(4, 0);
+    int p1 = 0;
+    int p2 = 0;
 
-    //Functions
-    ifstream Primes("Primes");
-    if (Primes.is_open()) {
-        Primes >> p1 >> p2;
-    } else cerr << "PROBLEM: Unable to open Primes" << endl;
-    Primes.close();
-
-    ifstream input("seed.in");
-    string property;
-    if (input.is_open()) {
-        while (!input.eof()) {
-            input >> property;
-            if (property == "RANDOMSEED") {
-                input >> seed[0] >> seed[1] >> seed[2] >> seed[3];
-                rnd.SetRandom(seed, p1, p2);
-            }
-        }
-        input.close();
-    } else cerr << "PROBLEM: Unable to open seed.in" << endl;
-
+    rnd = initialize(rnd, seed, p1, p2, "Primes", "seed.in");
     writeOnFile(M, N, rnd, lambda, expon_prob_sum, "results_1.dat");
     writeOnFile(M, N, rnd, mu, gamma, cauchy_prob_sum, "results_2.dat");
     writeOnFile(M, N, rnd, uniform_prob_sum, "results_3.dat");

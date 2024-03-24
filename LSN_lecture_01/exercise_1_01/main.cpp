@@ -8,9 +8,6 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 *****************************************************************
 *****************************************************************/
 
-#include <iostream>
-#include <fstream>
-#include <string>
 #include <cmath>
 #include <vector>
 #include <tuple>
@@ -23,7 +20,7 @@ int main(int argc, char *argv[]) {
 
     //Variables declaration
     Random rnd;
-    const int M = 100000; //Number of total throws
+    const int M = 1000000; //Number of total throws
     const int N = 100; //Number of blocks
     const double mu = 0.5; //Expected mean
     const int expecValue = M / N;
@@ -31,28 +28,11 @@ int main(int argc, char *argv[]) {
     tuple<vector<double>, vector<double>, vector<double>> cumulatives;
     vector<double> chi2(N, 0.);
     vector<int> count(N, 0);
-    int seed[4];
-    int p1, p2;
+    vector<int> seed(4, 0);
+    int p1 = 0;
+    int p2 = 0;
 
-    //Functions
-    ifstream Primes("Primes");
-    if (Primes.is_open()) {
-        Primes >> p1 >> p2;
-    } else cerr << "PROBLEM: Unable to open Primes" << endl;
-    Primes.close();
-
-    ifstream input("seed.in");
-    string property;
-    if (input.is_open()) {
-        while (!input.eof()) {
-            input >> property;
-            if (property == "RANDOMSEED") {
-                input >> seed[0] >> seed[1] >> seed[2] >> seed[3];
-                rnd.SetRandom(seed, p1, p2);
-            }
-        }
-        input.close();
-    } else cerr << "PROBLEM: Unable to open seed.in" << endl;
+    rnd = initialize(rnd, seed, p1, p2, "Primes", "seed.in");
 
     //Evaluation of the mean
     averages = mean(M, N, rnd);

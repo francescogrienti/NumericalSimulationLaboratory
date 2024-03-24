@@ -25,14 +25,14 @@ int main(int argc, char *argv[]) {
     int N = 100; //Number of blocks
     int L = M / N; //Number of throws per block;
     double a = 1.; //Lattice step
-    double *sum_d = new double[N]{0.};
-    double *sum_c = new double[N]{0.};
-    vector<vector<double>> err_d(M, vector<double>(N, 0.));
-    vector<vector<double>> err_c(M, vector<double>(N, 0.));
-    double *error_d = new double[N]{0.};
-    double *error_c = new double[N]{0.};
-    int *count_d = new int[n]{0};
-    double *count_c = new double[n]{0};
+    vector<double> average(N, 0.);
+    vector<vector<double>> sum_d(N, vector<double>(L, 0.));
+    vector<vector<double>> sum_c(N, vector<double>(L, 0.));
+    vector<vector<double>> ave(N, vector<double>(L, 0.));
+    vector<vector<double>> ave2(N, vector<double>(L, 0.));
+    vector<double> error(N, 0.);
+    vector<int> count_d(n, 0);
+    vector<int> count_c(n, 0);
     int seed[4];
     int p1, p2;
     ifstream Primes("Primes");
@@ -67,20 +67,33 @@ int main(int argc, char *argv[]) {
                 } else if (r > 0) {
                     count_d[(int) (r * n)] += a;
                 }
-                sum_d[i] += (pow(count_d[0], 2) + pow(count_d[1], 2) + pow(count_d[2], 2));
-                //err_d[j + k * N][i] = (pow(count_d[0], 2) + pow(count_d[1], 2) + pow(count_d[2], 2));
+                sum_d[k][i] += sqrt((pow(count_d[0], 2) + pow(count_d[1], 2) + pow(count_d[2], 2)));
             }
         }
     }
+
     for (int k = 0; k < N; k++) {
-        error_d[k] = sqrt((pow((sum_d[k] / M), 2) - (sum_d[k] / M)) / (M));
+        for (int i = 0; i < L; i++) {
+            ave[k][i] = (sum_d[k][i] / L);
+            ave2[k][i] = pow(ave[k][i], 2);
+        }
+    }
+    for (int i = 0; i < L; i++) {
+        double sum1 = 0.;
+        double sum2 = 0.;
+        for (int k = 0; k < N; k++) {
+            sum1 += ave2[k][i];
+            sum2 += ave[k][i];
+        }
+        average[i] = sum2 / N;
+        error[i] = sqrt(((sum1 / N) - pow(sum2 / N, 2)) / N);
     }
 
     ofstream WriteResults1;
     WriteResults1.open("results_1.dat");
     if (WriteResults1.is_open()) {
         for (int i = 0; i < N; i++) {
-            WriteResults1 << sqrt(sum_d[i] / M) << " " << error_d[i] << "\t" << endl;
+            WriteResults1 << average[i] << " " << error[i] << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults1.close();
@@ -97,20 +110,33 @@ int main(int argc, char *argv[]) {
                 count_c[0] += sin(theta) * sin(phi);
                 count_c[1] += sin(theta) * cos(phi);
                 count_c[2] += cos(theta);
-                sum_c[i] += (pow(count_c[0], 2) + pow(count_c[1], 2) + pow(count_c[2], 2));
-                err_c[j + k * N][i] = pow(count_c[0], 2) + pow(count_c[1], 2) + pow(count_c[2], 2);
+                sum_c[k][i] += sqrt((pow(count_c[0], 2) + pow(count_c[1], 2) + pow(count_c[2], 2)));
             }
         }
     }
 
     for (int k = 0; k < N; k++) {
-        error_c[k] = sqrt((pow(sum_c[k] / M, 2) - (sum_c[k] / M)) / (M));
+        for (int i = 0; i < L; i++) {
+            ave[k][i] = (sum_c[k][i] / L);
+            ave2[k][i] = pow(ave[k][i], 2);
+        }
     }
+    for (int i = 0; i < L; i++) {
+        double sum1 = 0.;
+        double sum2 = 0.;
+        for (int k = 0; k < N; k++) {
+            sum1 += ave2[k][i];
+            sum2 += ave[k][i];
+        }
+        average[i] = sum2 / N;
+        error[i] = sqrt(((sum1 / N) - pow(sum2 / N, 2)) / N);
+    }
+
     ofstream WriteResults2;
     WriteResults2.open("results_2.dat");
     if (WriteResults2.is_open()) {
         for (int i = 0; i < N; i++) {
-            WriteResults2 << sqrt(sum_c[i] / M) << " " << error_c[i] << "\t" << endl;
+            WriteResults1 << average[i] << " " << error[i] << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults2.close();

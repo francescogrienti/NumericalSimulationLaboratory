@@ -7,6 +7,10 @@
 _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 *****************************************************************
 *****************************************************************/
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 #ifndef __Random__
 #define __Random__
@@ -27,7 +31,7 @@ public:
     ~Random();
 
     // Method to set the seed for the RNG
-    void SetRandom(int *, int, int);
+    void SetRandom(std::vector<int> s, int p1 ,int p2);
 
     // Method to save the seed to a file
     void SaveSeed();

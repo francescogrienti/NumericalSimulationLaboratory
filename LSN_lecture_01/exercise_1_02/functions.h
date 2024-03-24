@@ -51,5 +51,8 @@ std::vector<double> uniform_prob_sum(Random rnd, int n, int throws);
 //Function returning the sum of n random variables sampled from a uniform distribution
 std::vector<double> cauchy_prob_sum(Random rnd, int n, int throws, double mean, double gamma);
 
+//Initialize random number generator
+Random initialize(Random rnd, std::vector<int> seed, int p1, int p2, std::string prime_file, std::string input_file);
+
 
 #endif //__NUMERICALSIMULATIONLABORATORY_FUNCTIONS_H__

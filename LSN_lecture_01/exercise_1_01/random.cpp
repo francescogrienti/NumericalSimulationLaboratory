@@ -11,8 +11,8 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <iostream>
 #include <fstream>
 #include <cmath>
-#include <cstdlib>
 #include "random.h"
+#include <vector>
 
 using namespace std;
 
@@ -67,7 +67,7 @@ double Random::Rannyu(void) {
     return r;
 }
 
-void Random::SetRandom(int *s, int p1, int p2) {
+void Random::SetRandom(vector<int> s, int p1, int p2) {
     // This function sets the seed and parameters of the random number generator
     m1 = 502;
     m2 = 1521;

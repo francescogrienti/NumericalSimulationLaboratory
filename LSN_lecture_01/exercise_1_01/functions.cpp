@@ -15,18 +15,18 @@ void writeOnFile(vector<double> average, vector<double> error, string filename) 
     ofstream WriteResults;
     WriteResults.open(filename);
     if (WriteResults.is_open()) {
-        for (int i = 0; i < (int)(average.size()); i++) {
+        for (int i = 0; i < (int) (average.size()); i++) {
             WriteResults << average[i] << " " << error[i] << " " << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults.close();
 }
 
-void writeOnFile(std::vector<double> chi2, std::string filename){
+void writeOnFile(std::vector<double> chi2, std::string filename) {
     ofstream WriteResults;
     WriteResults.open(filename);
     if (WriteResults.is_open()) {
-        for (int i = 0; i < (int)(chi2.size()); i++) {
+        for (int i = 0; i < (int) (chi2.size()); i++) {
             WriteResults << chi2[i] << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
@@ -35,10 +35,10 @@ void writeOnFile(std::vector<double> chi2, std::string filename){
 
 tuple<vector<double>, vector<double>, vector<double>>
 cumulativeAverage(vector<double> average, vector<double> average2) {
-    vector<double> sumProg((int)(average.size()), 0.);
-    vector<double> sum2Prog((int)(average.size()), 0.);
-    vector<double> errProg((int)(average.size()), 0.);
-    for (int k = 0; k < (int)(average.size()); k++) {
+    vector<double> sumProg((int) (average.size()), 0.);
+    vector<double> sum2Prog((int) (average.size()), 0.);
+    vector<double> errProg((int) (average.size()), 0.);
+    for (int k = 0; k < (int) (average.size()); k++) {
         sumProg[k] = 0.;
         sum2Prog[k] = 0.;
         for (int l = 0; l < k + 1; l++) {
@@ -87,6 +87,28 @@ tuple<vector<double>, vector<double>> mean(int M, int N, Random rnd, double mu) 
     return make_tuple(ave, ave2);
 }
 
+Random initialize(Random rnd, vector<int> seed, int p1, int p2, std::string prime_file, std::string input_file) {
+    ifstream Primes(prime_file);
+    if (Primes.is_open()) {
+        Primes >> p1 >> p2;
+    } else cerr << "PROBLEM: Unable to open Primes" << endl;
+    Primes.close();
+
+    ifstream input(input_file);
+    string property;
+    if (input.is_open()) {
+        while (!input.eof()) {
+            input >> property;
+            if (property == "RANDOMSEED") {
+                input >> seed[0] >> seed[1] >> seed[2] >> seed[3];
+                rnd.SetRandom(seed, p1, p2);
+            }
+        }
+        input.close();
+    } else cerr << "PROBLEM: Unable to open seed.in" << endl;
+
+    return rnd;
+}
 
 double error(vector<double> av, vector<double> av2, int n) {
     if (n == 0) {
