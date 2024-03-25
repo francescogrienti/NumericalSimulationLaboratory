@@ -169,7 +169,7 @@ Random initialize(Random rnd, vector<int> seed, int p1, int p2, std::string prim
 
 
 double func_f(double x) {
-    return (M_PI / 2) * cos((M_PI / 2) * x);
+    return (M_PI / 2.) * cos((M_PI / 2.) * x);
 }
 
 double prob_p(double x) {
@@ -177,7 +177,7 @@ double prob_p(double x) {
 }
 
 double func_g(double x) {
-    return ((M_PI / 3) * cos((M_PI / 2) * x)) / (1 - pow(x, 2));
+    return ((M_PI / 3.) * cos((M_PI / 2.) * x)) / (1 - pow(x, 2));
 }
 
 
