@@ -12,8 +12,11 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include "random.h"
 #include "functions.h"
 #include <tuple>
+#include <vector>
 
 using namespace std;
+
+//TODO Fixare per M = 100000 o superiori perché sembra dare problemi;
 
 int main(int argc, char *argv[]) {
 
@@ -44,7 +47,6 @@ int main(int argc, char *argv[]) {
             }
             mean_integral[j] = sum2 / N;
             sum1 += mean_integral[j];
-            mean_integral[j] = 0.;
         }
         ave[i] = double(sum1 / L); //Store average values for each block
         ave2[i] = double(pow(ave[i], 2)); //Store square of the average for each block

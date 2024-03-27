@@ -19,7 +19,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
     Random rnd;
-    const int M = 100000; //Throws
+    const int M = 1000000; //Throws
     const int N = 100; //Blocks
     const int L = M / N; //Throws per block
     const double l = 1.; //Length of the needle
