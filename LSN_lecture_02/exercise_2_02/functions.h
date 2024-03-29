@@ -17,6 +17,10 @@ std::tuple<std::vector<double>, std::vector<double>> mean(int M, int N, Random r
 //Mean of the standard deviation
 std::tuple<std::vector<double>, std::vector<double>> mean(int M, int N, Random rnd, double mu);
 
+//Mean and error
+std::tuple<std::vector<double>, std::vector<double>>
+mean_and_error(std::vector<std::vector<double>> matrix_case, int N, int L);
+
 //Cumulative average and error
 std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
 cumulativeAverage(std::vector<double> average, std::vector<double> average2);

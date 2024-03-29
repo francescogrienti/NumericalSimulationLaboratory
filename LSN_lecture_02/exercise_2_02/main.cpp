@@ -24,14 +24,9 @@ int main(int argc, char *argv[]) {
     const int N = 100; //Number of blocks
     const int L = M / N; //Number of throws per block;
     const int a = 1; //Lattice step
-    vector<double> average(N, 0.);
-    vector<double> error(N, 0.);
+    tuple<vector<double>, vector<double>> results;
     tuple<vector<vector<double>>, vector<int>> discrete_case;
     tuple<vector<vector<double>>, vector<int>> continuum_case;
-    //vector<vector<double>> sum_c(N, vector<double>(L, 0.));
-    vector<vector<double>> ave(N, vector<double>(L, 0.));
-    vector<vector<double>> ave2(N, vector<double>(L, 0.));
-    //vector<double> count_c(n, 0.);
     vector<int> seed(4, 0);
     int p1 = 0;
     int p2 = 0;
@@ -57,61 +52,29 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-
-    for (int k = 0; k < N; k++) {
-        for (int i = 0; i < L; i++) {
-            ave[k][i] = (get<0>(discrete_case)[k][i] / L);
-            ave2[k][i] = pow(ave[k][i], 2);
-        }
-    }
-    for (int i = 0; i < L; i++) {
-        double sum1 = 0.;
-        double sum2 = 0.;
-        for (int k = 0; k < N; k++) {
-            sum1 += ave2[k][i];
-            sum2 += ave[k][i];
-        }
-        average[i] = sum2 / N;
-        error[i] = sqrt(((sum1 / N) - pow(sum2 / N, 2)) / N);
-    }
-
-    writeOnFile(average, error, "results_1.dat");
+    results = mean_and_error(get<0>(discrete_case), N, L);
+    writeOnFile(get<0>(results), get<1>(results), "results_1.dat");
 
     //Continuum case
     for (int k = 0; k < N; k++) {
         for (int j = 0; j < N; j++) {
-            count_c[0] = 0.;
-            count_c[1] = 0.;
-            count_c[2] = 0.;
+            get<1>(continuum_case)[0] = 0;
+            get<1>(continuum_case)[1] = 0;
+            get<1>(continuum_case)[2] = 0;
             for (int i = 0; i < L; i++) {
                 double theta = rnd.Rannyu(0, M_PI);
                 double phi = rnd.Rannyu(0, 2 * M_PI);
-                count_c[0] += sin(theta) * sin(phi);
-                count_c[1] += sin(theta) * cos(phi);
-                count_c[2] += cos(theta);
-                sum_c[k][i] += sqrt((pow(count_c[0], 2) + pow(count_c[1], 2) + pow(count_c[2], 2)));
+                get<1>(continuum_case)[0] += sin(theta) * sin(phi);
+                get<1>(continuum_case)[1] += sin(theta) * cos(phi);
+                get<1>(continuum_case)[2] += cos(theta);
+                get<0>(continuum_case)[k][i] += sqrt(
+                        (pow(get<1>(continuum_case)[0], 2) + pow(get<1>(continuum_case)[1], 2) +
+                         pow(get<1>(continuum_case)[2], 2)));
             }
         }
     }
-
-    for (int k = 0; k < N; k++) {
-        for (int i = 0; i < L; i++) {
-            ave[k][i] = (sum_c[k][i] / L);
-            ave2[k][i] = pow(ave[k][i], 2);
-        }
-    }
-    for (int i = 0; i < L; i++) {
-        double sum1 = 0.;
-        double sum2 = 0.;
-        for (int k = 0; k < N; k++) {
-            sum1 += ave2[k][i];
-            sum2 += ave[k][i];
-        }
-        average[i] = sum2 / N;
-        error[i] = sqrt(((sum1 / N) - pow(sum2 / N, 2)) / N);
-    }
-
-    writeOnFile(average, error, "results_2.dat");
+    results = mean_and_error(get<0>(continuum_case), N, L);
+    writeOnFile(get<0>(results), get<1>(results), "results_2.dat");
 
     rnd.SaveSeed();
     return 0;

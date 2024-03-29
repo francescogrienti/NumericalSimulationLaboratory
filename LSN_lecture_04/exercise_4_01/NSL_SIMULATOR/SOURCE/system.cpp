@@ -576,7 +576,7 @@ void System::measure() { // Measure properties
     // TEMPERATURE ///////////////////////////////////////////////////////////////
     if (_measure_temp and _measure_kenergy) _measurement(_index_temp) = (2.0 / 3.0) * kenergy_temp;
     if (_measure_pressure and _measure_kenergy) {
-        pressure_temp = ((_rho * (2.0 / 3.0) * kenergy_temp) + pressure_temp) / double(_npart);
+        pressure_temp = (_rho * (2.0 / 3.0) * kenergy_temp) + (pressure_temp / double(_npart));
         _measurement(_index_pressure) = pressure_temp;
     }
 // TO BE FIXED IN EXERCISE 4

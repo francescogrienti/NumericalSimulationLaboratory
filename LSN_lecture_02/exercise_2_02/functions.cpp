@@ -135,6 +135,31 @@ tuple<vector<double>, vector<double>> mean(int M, int N, Random rnd, double mu) 
     return make_tuple(ave, ave2);
 }
 
+tuple<vector<double>, vector<double>> mean_and_error(vector<vector<double>> matrix_case, int N, int L) {
+    vector<vector<double>> ave(N, vector<double>(L, 0.));
+    vector<vector<double>> ave2(N, vector<double>(L, 0.));
+    vector<double> average(N, 0.);
+    vector<double> error(N, 0.);
+    for (int k = 0; k < N; k++) {
+        for (int i = 0; i < L; i++) {
+            ave[k][i] = (matrix_case[k][i] / L);
+            ave2[k][i] = pow(ave[k][i], 2);
+        }
+    }
+    for (int i = 0; i < L; i++) {
+        double sum1 = 0.;
+        double sum2 = 0.;
+        for (int k = 0; k < N; k++) {
+            sum1 += ave2[k][i];
+            sum2 += ave[k][i];
+        }
+        average[i] = sum2 / N;
+        error[i] = sqrt(((sum1 / N) - pow(sum2 / N, 2)) / N);
+    }
+
+    return make_tuple(average, error);
+}
+
 
 double error(vector<double> av, vector<double> av2, int n) {
     if (n == 0) {
