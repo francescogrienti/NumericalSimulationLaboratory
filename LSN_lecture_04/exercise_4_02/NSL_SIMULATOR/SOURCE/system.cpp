@@ -11,7 +11,16 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <cmath>
 #include <cstdlib>
 #include <string>
+#include <cctype>
 #include "system.h"
+
+std::string toLowerCase(const std::string &str) {
+    std::string result;
+    for (char c: str) {
+        result += std::tolower(c);
+    }
+    return result;
+}
 
 using namespace std;
 using namespace arma;
@@ -137,7 +146,8 @@ int System::pbc(int i) { // Enforce periodic boundary conditions for spins
 }
 
 void
-System::initialize() { // Initialize the System object according to the content of the input files in the ../INPUT/ directory
+System::initialize(
+        string phase) { // Initialize the System object according to the content of the input files in the ../INPUT/ directory
 
     int p1, p2; // Read from ../INPUT/Primes a pair of numbers to be used to initialize the RNG
     ifstream Primes("../INPUT/Primes");
@@ -148,13 +158,14 @@ System::initialize() { // Initialize the System object according to the content 
     Seed >> seed[0] >> seed[1] >> seed[2] >> seed[3];
     _rnd.SetRandom(seed, p1, p2);
 
-    ofstream couta("../OUTPUT/acceptance.dat"); // Set the heading line in file ../OUTPUT/acceptance.dat
+    ofstream couta(
+            "../OUTPUT/OUTPUT_" + phase + "/acceptance.dat"); // Set the heading line in file ../OUTPUT/acceptance.dat
     couta << "#   N_BLOCK:  ACCEPTANCE:" << endl;
     couta.close();
 
-    ifstream input("../INPUT/input.dat"); // Start reading ../INPUT/input.dat
+    ifstream input("../INPUT/INPUT_EXAMPLES/input." + toLowerCase(phase)); // Start reading ../INPUT/input.dat
     ofstream coutf;
-    coutf.open("../OUTPUT/output.dat");
+    coutf.open("../OUTPUT/OUTPUT_" + phase + "/output.dat");
     string property;
     double delta;
     while (!input.eof()) {
@@ -285,7 +296,7 @@ void System::initialize_velocities() {
     return;
 }
 
-void System::initialize_properties() { // Initialize data members used for measurement of properties
+void System::initialize_properties(string phase) { // Initialize data members used for measurement of properties
 
     string property;
     int index_property = 0;
@@ -305,7 +316,7 @@ void System::initialize_properties() { // Initialize data members used for measu
         while (!input.eof()) {
             input >> property;
             if (property == "POTENTIAL_ENERGY") {
-                ofstream coutp("../OUTPUT/potential_energy.dat");
+                ofstream coutp("../OUTPUT/OUTPUT_" + phase + "/potential_energy.dat");
                 coutp << "#     BLOCK:  ACTUAL_PE:     PE_AVE:      ERROR:" << endl;
                 coutp.close();
                 _nprop++;
@@ -314,7 +325,7 @@ void System::initialize_properties() { // Initialize data members used for measu
                 index_property++;
                 _vtail = 0.0; // TO BE FIXED IN EXERCISE 7
             } else if (property == "KINETIC_ENERGY") {
-                ofstream coutk("../OUTPUT/kinetic_energy.dat");
+                ofstream coutk("../OUTPUT/OUTPUT_" + phase + "/kinetic_energy.dat");
                 coutk << "#     BLOCK:   ACTUAL_KE:    KE_AVE:      ERROR:" << endl;
                 coutk.close();
                 _nprop++;
@@ -322,7 +333,7 @@ void System::initialize_properties() { // Initialize data members used for measu
                 _index_kenergy = index_property;
                 index_property++;
             } else if (property == "TOTAL_ENERGY") {
-                ofstream coutt("../OUTPUT/total_energy.dat");
+                ofstream coutt("../OUTPUT/OUTPUT_" + phase + "/total_energy.dat");
                 coutt << "#     BLOCK:   ACTUAL_TE:    TE_AVE:      ERROR:" << endl;
                 coutt.close();
                 _nprop++;
@@ -330,7 +341,7 @@ void System::initialize_properties() { // Initialize data members used for measu
                 _index_tenergy = index_property;
                 index_property++;
             } else if (property == "TEMPERATURE") {
-                ofstream coutte("../OUTPUT/temperature.dat");
+                ofstream coutte("../OUTPUT/OUTPUT_" + phase + "/temperature.dat");
                 coutte << "#     BLOCK:   ACTUAL_T:     T_AVE:       ERROR:" << endl;
                 coutte.close();
                 _nprop++;
@@ -338,7 +349,7 @@ void System::initialize_properties() { // Initialize data members used for measu
                 _index_temp = index_property;
                 index_property++;
             } else if (property == "PRESSURE") {
-                ofstream coutpr("../OUTPUT/pressure.dat");
+                ofstream coutpr("../OUTPUT/OUTPUT_" + phase + "/pressure.dat");
                 coutpr << "#     BLOCK:   ACTUAL_P:     P_AVE:       ERROR:" << endl;
                 coutpr.close();
                 _nprop++;
@@ -347,7 +358,7 @@ void System::initialize_properties() { // Initialize data members used for measu
                 index_property++;
                 _ptail = 0.0; // TO BE FIXED IN EXERCISE 7
             } else if (property == "GOFR") {
-                ofstream coutgr("../OUTPUT/gofr.dat");
+                ofstream coutgr("../OUTPUT/OUTPUT_" + phase + "/gofr.dat");
                 coutgr << "# DISTANCE:     AVE_GOFR:        ERROR:" << endl;
                 coutgr.close();
                 input >> _n_bins;
@@ -357,7 +368,7 @@ void System::initialize_properties() { // Initialize data members used for measu
                 _index_gofr = index_property;
                 index_property += _n_bins;
             } else if (property == "MAGNETIZATION") {
-                ofstream coutpr("../OUTPUT/magnetization.dat");
+                ofstream coutpr("../OUTPUT/OUTPUT_" + phase + "/magnetization.dat");
                 coutpr << "#     BLOCK:   ACTUAL_M:     M_AVE:       ERROR:" << endl;
                 coutpr.close();
                 _nprop++;
@@ -365,7 +376,7 @@ void System::initialize_properties() { // Initialize data members used for measu
                 _index_magnet = index_property;
                 index_property++;
             } else if (property == "SPECIFIC_HEAT") {
-                ofstream coutpr("../OUTPUT/specific_heat.dat");
+                ofstream coutpr("../OUTPUT/OUTPUT_" + phase + "/specific_heat.dat");
                 coutpr << "#     BLOCK:   ACTUAL_CV:    CV_AVE:      ERROR:" << endl;
                 coutpr.close();
                 _nprop++;
@@ -373,7 +384,7 @@ void System::initialize_properties() { // Initialize data members used for measu
                 _index_cv = index_property;
                 index_property++;
             } else if (property == "SUSCEPTIBILITY") {
-                ofstream coutpr("../OUTPUT/susceptibility.dat");
+                ofstream coutpr("../OUTPUT/OUTPUT_" + phase + "/susceptibility.dat");
                 coutpr << "#     BLOCK:   ACTUAL_X:     X_AVE:       ERROR:" << endl;
                 coutpr.close();
                 _nprop++;
@@ -382,7 +393,7 @@ void System::initialize_properties() { // Initialize data members used for measu
                 index_property++;
             } else if (property == "ENDPROPERTIES") {
                 ofstream coutf;
-                coutf.open("../OUTPUT/output.dat", ios::app);
+                coutf.open("../OUTPUT/OUTPUT_" + phase + "/output.dat", ios::app);
                 coutf << "Reading properties completed!" << endl;
                 coutf.close();
                 break;
@@ -405,21 +416,21 @@ void System::initialize_properties() { // Initialize data members used for measu
     return;
 }
 
-void System::finalize() {
-    this->write_configuration();
+void System::finalize(string phase) {
+    this->write_configuration(phase);
     _rnd.SaveSeed();
     ofstream coutf;
-    coutf.open("../OUTPUT/output.dat", ios::app);
+    coutf.open("../OUTPUT/OUTPUT_" + phase + "/output.dat", ios::app);
     coutf << "Simulation completed!" << endl;
     coutf.close();
     return;
 }
 
 // Write current configuration as a .xyz file in directory ../OUTPUT/CONFIG/
-void System::write_configuration() {
+void System::write_configuration(string phase) {
     ofstream coutf;
     if (_sim_type < 2) {
-        coutf.open("../OUTPUT/CONFIG/config.xyz");
+        coutf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/config.xyz");
         if (coutf.is_open()) {
             coutf << _npart << endl;
             coutf << "#Comment!" << endl;
@@ -431,9 +442,9 @@ void System::write_configuration() {
             }
         } else cerr << "PROBLEM: Unable to open config.xyz" << endl;
         coutf.close();
-        this->write_velocities();
+        this->write_velocities(phase);
     } else {
-        coutf.open("../OUTPUT/CONFIG/config.spin");
+        coutf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/config.spin");
         for (int i = 0; i < _npart; i++) coutf << _particle(i).getspin() << " ";
         coutf.close();
     }
@@ -441,9 +452,9 @@ void System::write_configuration() {
 }
 
 // Write configuration nconf as a .xyz file in directory ../OUTPUT/CONFIG/
-void System::write_XYZ(int nconf) {
+void System::write_XYZ(int nconf, string phase) {
     ofstream coutf;
-    coutf.open("../OUTPUT/CONFIG/config_" + to_string(nconf) + ".xyz");
+    coutf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/config_" + to_string(nconf) + ".xyz");
     if (coutf.is_open()) {
         coutf << _npart << endl;
         coutf << "#Comment!" << endl;
@@ -458,9 +469,9 @@ void System::write_XYZ(int nconf) {
     return;
 }
 
-void System::write_velocities() {
+void System::write_velocities(string phase) {
     ofstream coutf;
-    coutf.open("../OUTPUT/CONFIG/velocities.out");
+    coutf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/velocities.out");
     if (coutf.is_open()) {
         for (int i = 0; i < _npart; i++) {
             coutf << setw(16) << _particle(i).getvelocity(0)          // vx
@@ -508,10 +519,10 @@ void System::read_configuration() {
     return;
 }
 
-void System::block_reset(int blk) { // Reset block accumulators to zero
+void System::block_reset(int blk, string phase) { // Reset block accumulators to zero
     ofstream coutf;
     if (blk > 0) {
-        coutf.open("../OUTPUT/output.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/output.dat", ios::app);
         coutf << "Block completed: " << blk << endl;
         coutf.close();
     }
@@ -541,8 +552,9 @@ void System::measure() { // Measure properties
                 // GOFR ... TO BE FIXED IN EXERCISE 7
                 if (dr < _r_cut) {
                     if (_measure_penergy) penergy_temp += 1.0 / pow(dr, 12) - 1.0 / pow(dr, 6); // POTENTIAL ENERGY
-                    if (_measure_pressure) pressure_temp += (48. / _volume * 3.) *
-                                                            (1.0 / pow(dr, 12) - 0.5 / pow(dr, 6)); // PRESSURE
+                    if (_measure_pressure)
+                        pressure_temp += (48. / _volume * 3.) *
+                                         (1.0 / pow(dr, 12) - 0.5 / pow(dr, 6)); // PRESSURE
                 }
             }
         }
@@ -592,7 +604,7 @@ void System::measure() { // Measure properties
     return;
 }
 
-void System::averages(int blk) {
+void System::averages(int blk, string phase) {
 
     ofstream coutf;
     double average, sum_average, sum_ave2;
@@ -603,7 +615,7 @@ void System::averages(int blk) {
 
     // POTENTIAL ENERGY //////////////////////////////////////////////////////////
     if (_measure_penergy) {
-        coutf.open("../OUTPUT/potential_energy.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/potential_energy.dat", ios::app);
         average = _average(_index_penergy);
         sum_average = _global_av(_index_penergy);
         sum_ave2 = _global_av2(_index_penergy);
@@ -615,7 +627,7 @@ void System::averages(int blk) {
     }
     // KINETIC ENERGY ////////////////////////////////////////////////////////////
     if (_measure_kenergy) {
-        coutf.open("../OUTPUT/kinetic_energy.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/kinetic_energy.dat", ios::app);
         average = _average(_index_kenergy);
         sum_average = _global_av(_index_kenergy);
         sum_ave2 = _global_av2(_index_kenergy);
@@ -627,7 +639,7 @@ void System::averages(int blk) {
     }
     // TOTAL ENERGY //////////////////////////////////////////////////////////////
     if (_measure_tenergy) {
-        coutf.open("../OUTPUT/total_energy.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/total_energy.dat", ios::app);
         average = _average(_index_tenergy);
         sum_average = _global_av(_index_tenergy);
         sum_ave2 = _global_av2(_index_tenergy);
@@ -639,7 +651,7 @@ void System::averages(int blk) {
     }
     // TEMPERATURE ///////////////////////////////////////////////////////////////
     if (_measure_temp) {
-        coutf.open("../OUTPUT/temperature.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/temperature.dat", ios::app);
         average = _average(_index_temp);
         sum_average = _global_av(_index_temp);
         sum_ave2 = _global_av2(_index_temp);
@@ -651,7 +663,7 @@ void System::averages(int blk) {
     }
     // PRESSURE //////////////////////////////////////////////////////////////////
     if (_measure_pressure) {
-        coutf.open("../OUTPUT/pressure.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/pressure.dat", ios::app);
         average = _average(_index_pressure);
         sum_average = _global_av(_index_pressure);
         sum_ave2 = _global_av2(_index_pressure);
@@ -671,7 +683,7 @@ void System::averages(int blk) {
     // TO BE FIXED IN EXERCISE 6
     // ACCEPTANCE ////////////////////////////////////////////////////////////////
     double fraction;
-    coutf.open("../OUTPUT/acceptance.dat", ios::app);
+    coutf.open("../OUTPUT/OUTPUT_" + phase + "/acceptance.dat", ios::app);
     if (_nattempts > 0) fraction = double(_naccepted) / double(_nattempts);
     else fraction = 0.0;
     coutf << setw(12) << blk << setw(12) << fraction << endl;
