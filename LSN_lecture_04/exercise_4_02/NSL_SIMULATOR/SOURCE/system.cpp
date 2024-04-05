@@ -26,13 +26,26 @@ using namespace std;
 using namespace arma;
 
 void System::step() { // Perform a simulation step
+    if (_restart) {
+        if (_sim_type == 0) this->Verlet();  // Perform a MD step
+        else
+            for (int i = 0; i < _npart; i++)
+                this->move(int(_rnd.Rannyu() * _npart)); // Perform a MC step on a randomly choosen particle
+        _nattempts += _npart; //update number of attempts performed on the system
+    }
+    return;
+}
+
+void System::step_restart() { // Perform a simulation step
     if (_sim_type == 0) this->Verlet();  // Perform a MD step
     else
         for (int i = 0; i < _npart; i++)
             this->move(int(_rnd.Rannyu() * _npart)); // Perform a MC step on a randomly choosen particle
     _nattempts += _npart; //update number of attempts performed on the system
+
     return;
 }
+
 
 void System::Verlet() {
     double xnew, ynew, znew;
@@ -190,6 +203,9 @@ System::initialize(
             input >> _temp;
             _beta = 1.0 / _temp;
             coutf << "TEMPERATURE= " << _temp << endl;
+        } else if (property == "DESIRED_TEMP") {
+            input >> _desired_temp;
+            coutf << "DESIRED_TEMPERATURE= " << _desired_temp << endl;
         } else if (property == "NPART") {
             input >> _npart;
             _fx.resize(_npart);
@@ -244,6 +260,62 @@ void System::initialize_velocities() {
     if (_restart and _sim_type == 0) {
         ifstream cinf;
         cinf.open("../INPUT/CONFIG/velocities.in");
+        if (cinf.is_open()) {
+            double vx, vy, vz;
+            for (int i = 0; i < _npart; i++) {
+                cinf >> vx >> vy >> vz;
+                _particle(i).setvelocity(0, vx);
+                _particle(i).setvelocity(1, vy);
+                _particle(i).setvelocity(2, vz);
+            }
+        } else cerr << "PROBLEM: Unable to open INPUT file velocities.in" << endl;
+        cinf.close();
+    } else {
+        vec vx(_npart), vy(_npart), vz(_npart);
+        vec sumv(_ndim);
+        sumv.zeros();
+        for (int i = 0; i < _npart; i++) {
+            vx(i) = _rnd.Gauss(0., sqrt(_temp));
+            vy(i) = _rnd.Gauss(0., sqrt(_temp));
+            vz(i) = _rnd.Gauss(0., sqrt(_temp));
+            sumv(0) += vx(i);
+            sumv(1) += vy(i);
+            sumv(2) += vz(i);
+        }
+        for (int idim = 0; idim < _ndim; idim++) sumv(idim) = sumv(idim) / double(_npart);
+        double sumv2 = 0.0, scalef;
+        for (int i = 0; i < _npart; i++) {
+            vx(i) = vx(i) - sumv(0);
+            vy(i) = vy(i) - sumv(1);
+            vz(i) = vz(i) - sumv(2);
+            sumv2 += vx(i) * vx(i) + vy(i) * vy(i) + vz(i) * vz(i);
+        }
+        sumv2 /= double(_npart);
+        scalef = sqrt(3.0 * _temp / sumv2);   // velocity scale factor
+        for (int i = 0; i < _npart; i++) {
+            _particle(i).setvelocity(0, vx(i) * scalef);
+            _particle(i).setvelocity(1, vy(i) * scalef);
+            _particle(i).setvelocity(2, vz(i) * scalef);
+        }
+    }
+    if (_sim_type == 0) {
+        double xold, yold, zold;
+        for (int i = 0; i < _npart; i++) {
+            xold = this->pbc(_particle(i).getposition(0, true) - _particle(i).getvelocity(0) * _delta, 0);
+            yold = this->pbc(_particle(i).getposition(1, true) - _particle(i).getvelocity(1) * _delta, 1);
+            zold = this->pbc(_particle(i).getposition(2, true) - _particle(i).getvelocity(2) * _delta, 2);
+            _particle(i).setpositold(0, xold);
+            _particle(i).setpositold(1, yold);
+            _particle(i).setpositold(2, zold);
+        }
+    }
+    return;
+}
+
+void System::initialize_velocities(string phase) {
+    if (_sim_type == 0) {
+        ifstream cinf;
+        cinf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/velocities.out");
         if (cinf.is_open()) {
             double vx, vy, vz;
             for (int i = 0; i < _npart; i++) {
@@ -426,6 +498,10 @@ void System::finalize(string phase) {
     return;
 }
 
+bool System::get_restart() {
+    return _restart;
+}
+
 // Write current configuration as a .xyz file in directory ../OUTPUT/CONFIG/
 void System::write_configuration(string phase) {
     ofstream coutf;
@@ -487,6 +563,41 @@ void System::write_velocities(string phase) {
 void System::read_configuration() {
     ifstream cinf;
     cinf.open("../INPUT/CONFIG/config.xyz");
+    if (cinf.is_open()) {
+        string comment;
+        string particle;
+        double x, y, z;
+        int ncoord;
+        cinf >> ncoord;
+        if (ncoord != _npart) {
+            cerr << "PROBLEM: conflicting number of coordinates in input.dat & config.xyz not match!" << endl;
+            exit(EXIT_FAILURE);
+        }
+        cinf >> comment;
+        for (int i = 0; i < _npart; i++) {
+            cinf >> particle >> x >> y >> z; // units of coordinates in conf.xyz is _side
+            _particle(i).setposition(0, this->pbc(_side(0) * x, 0));
+            _particle(i).setposition(1, this->pbc(_side(1) * y, 1));
+            _particle(i).setposition(2, this->pbc(_side(2) * z, 2));
+            _particle(i).acceptmove(); // _x_old = _x_new
+        }
+    } else cerr << "PROBLEM: Unable to open INPUT file config.xyz" << endl;
+    cinf.close();
+    if (_restart and _sim_type > 1) {
+        int spin;
+        cinf.open("../INPUT/CONFIG/config.spin");
+        for (int i = 0; i < _npart; i++) {
+            cinf >> spin;
+            _particle(i).setspin(spin);
+        }
+        cinf.close();
+    }
+    return;
+}
+
+void System::read_configuration(string phase) {
+    ifstream cinf;
+    cinf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/config.xyz");
     if (cinf.is_open()) {
         string comment;
         string particle;
@@ -586,7 +697,9 @@ void System::measure() { // Measure properties
         }
     }
     // TEMPERATURE ///////////////////////////////////////////////////////////////
-    if (_measure_temp and _measure_kenergy) _measurement(_index_temp) = (2.0 / 3.0) * kenergy_temp;
+    if (_measure_temp and _measure_kenergy) {
+        _measurement(_index_temp) = (2.0 / 3.0) * kenergy_temp;
+    }
     if (_measure_pressure and _measure_kenergy) {
         pressure_temp = (_rho * (2.0 / 3.0) * kenergy_temp) + (pressure_temp / double(_npart));
         _measurement(_index_pressure) = pressure_temp;
@@ -602,6 +715,18 @@ void System::measure() { // Measure properties
     _block_av += _measurement; //Update block accumulators
 
     return;
+}
+
+void System::measure_temp() {
+    double kenergy_temp = 0.0; // temporary accumulator for kinetic energy
+    if (_measure_kenergy) {
+        for (int i = 0; i < _npart; i++)
+            kenergy_temp += 0.5 * dot(_particle(i).getvelocity(), _particle(i).getvelocity());
+        kenergy_temp /= double(_npart);
+    }
+    if ((2.0 / 3.0) * kenergy_temp == _desired_temp) {
+        _restart = true;
+    }
 }
 
 void System::averages(int blk, string phase) {

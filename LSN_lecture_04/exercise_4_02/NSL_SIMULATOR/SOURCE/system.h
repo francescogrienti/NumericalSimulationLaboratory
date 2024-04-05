@@ -34,7 +34,7 @@ private:
     int _nsteps;          // Number of simulation steps in each block
     int _nattempts;       // Number of attempted moves
     int _naccepted;       // Number of accepted moves
-    double _temp, _beta;  // Temperature and inverse temperature
+    double _temp, _beta, _desired_temp;  // Temperature and inverse temperature
     double _rho, _volume; // Density and volume of the system
     double _r_cut;        // Cutoff radius for pair interactions
     double _delta;        // Displacement step for particle moves
@@ -72,10 +72,14 @@ public: // Function declarations
     void write_XYZ(int nconf, string phase);  // Write system configuration in XYZ format on the fly
     void write_velocities(string phase);    // Write final particle velocities to file
     void read_configuration();  // Read system configuration from file
+    void read_configuration(string phase);  // Read system configuration from file
     void initialize_velocities();// Initialize particle velocities
+    void initialize_velocities(string phase);// Initialize particle velocities
     void step();                // Perform a simulation step
+    void step_restart();                // Perform a simulation step
     void block_reset(int blk, string phase);  // Reset block averages
     void measure();             // Measure properties of the system
+    void measure_temp();
     void averages(int blk, string phase);     // Compute averages of properties
     double error(double acc, double acc2, int blk); // Compute error
     void move(int part);        // Move a particle
@@ -85,6 +89,7 @@ public: // Function declarations
     void Verlet();              // Perform Verlet integration step
     double Force(int i, int dim); // Calculate force on a particle along a dimension
     double Boltzmann(int i, bool xnew); // Calculate Boltzmann factor for Metropolis acceptance
+    bool get_restart();
 
 };
 

@@ -26,15 +26,32 @@ int main(int argc, char *argv[]) {
     // Convert the argument to an integer
     string phase = argv[1];
 
+    bool breaking = false;
     int nconf = 1;
     System SYS;
     SYS.initialize(phase);
     SYS.initialize_properties(phase);
     SYS.block_reset(0, phase);
 
+    for (int i = 0; i < SYS.get_nbl() && !breaking; i++) { //loop over blocks
+        for (int j = 0; j < SYS.get_nsteps() && !breaking; j++) { //loop over steps in a block
+            if (!SYS.get_restart()) {
+                breaking = true;
+                SYS.write_configuration(phase);
+            } else {
+                SYS.step();
+                SYS.measure_temp();
+            }
+        }
+    }
+
+    //RESTART THE SIMULATION
+    SYS.block_reset(0, phase);
+    SYS.read_configuration(phase);
+    SYS.initialize_velocities(phase);
     for (int i = 0; i < SYS.get_nbl(); i++) { //loop over blocks
         for (int j = 0; j < SYS.get_nsteps(); j++) { //loop over steps in a block
-            SYS.step();
+            SYS.step_restart();
             SYS.measure();
             if (j % 10 == 0) {
 //              SYS.write_XYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"!
@@ -44,6 +61,7 @@ int main(int argc, char *argv[]) {
         SYS.averages(i + 1, phase);
         SYS.block_reset(i + 1, phase);
     }
+
     SYS.finalize(phase);
 
     return 0;
