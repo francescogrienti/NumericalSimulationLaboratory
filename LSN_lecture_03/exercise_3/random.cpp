@@ -67,7 +67,7 @@ double Random :: Rannyu(void){
   return r;
 }
 
-void Random :: SetRandom(int * s, int p1, int p2){
+void Random :: SetRandom(std::vector<int> s, int p1, int p2){
   // This function sets the seed and parameters of the random number generator
   m1 = 502;
   m2 = 1521;

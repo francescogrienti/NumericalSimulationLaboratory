@@ -10,8 +10,8 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 
 #include <iostream>
 #include <fstream>
-#include <string>
 #include "random.h"
+#include "functions.h"
 #include "cmath"
 #include "algorithm"
 #include <vector>
@@ -49,29 +49,17 @@ int main(int argc, char *argv[]) {
     vector<double> sumP_prog(N, 0.);
     vector<double> sum2P_prog(N, 0.);
     vector<double> errP_prog(N, 0.);
+    vector<int> seed(4, 0);
+    int p1 = 0;
+    int p2 = 0;
+
+    rnd = initialize(rnd, seed, p1, p2, "Primes", "seed.in");
+
+    //Direct
+    // aggiungere il codice già fatto
 
 
-    int seed[4];
-    int p1, p2;
-    ifstream Primes("Primes");
-    if (Primes.is_open()) {
-        Primes >> p1 >> p2;
-    } else cerr << "PROBLEM: Unable to open Primes" << endl;
-    Primes.close();
-
-    ifstream input("seed.in");
-    string property;
-    if (input.is_open()) {
-        while (!input.eof()) {
-            input >> property;
-            if (property == "RANDOMSEED") {
-                input >> seed[0] >> seed[1] >> seed[2] >> seed[3];
-                rnd.SetRandom(seed, p1, p2);
-            }
-        }
-        input.close();
-    } else cerr << "PROBLEM: Unable to open seed.in" << endl;
-
+    //Discretized
     for (int i = 0; i < N; i++) {
         double sum_C = 0.;
         double sum_P = 0.;
