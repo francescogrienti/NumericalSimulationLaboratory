@@ -40,6 +40,9 @@ public:
     // Method to generate a random number in the range [min,max)
     double Rannyu(double min, double max);
 
+    // Method to generate a uniform random number in the range [n-step, n+step)
+    std::vector<double> transition_probability(std::vector<double> x, double metropolis_step);
+
     // Method to generate a random number with a Gaussian distribution
     double Gauss(double mean, double sigma);
 };
