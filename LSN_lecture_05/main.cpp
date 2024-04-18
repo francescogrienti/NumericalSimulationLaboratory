@@ -21,22 +21,19 @@ int main(int argc, char *argv[]) {
 
     Random rnd;
     int M = 1000000; //Throws
-    int N = 200; //Blocks
+    int N = 100; //Blocks
     vector<double> x_0_gauss_GS(3, 1.0);
-    vector<double> x_0_gauss_ES(3, 1.0);
+    vector<double> x_0_gauss_ES(3, 3.0);
     vector<double> x_0_uniform_GS(3, 1.0);
-    vector<double> x_0_uniform_ES(3, 1.0);
+    vector<double> x_0_uniform_ES(3, 3.0);
     tuple<vector<double>, vector<double>> Gauss_GS;
     tuple<vector<double>, vector<double>> Gauss_ES;
     tuple<vector<double>, vector<double>> Uniform_GS;
     tuple<vector<double>, vector<double>> Uniform_ES;
-    //vector<double> sumProg(N, 0.);
-    //vector<double> sum2Prog(N, 0.);
-    //vector<double> errProg(N, 0.);
-    double metropolis_step_gauss_GS = 1.0;
-    double metropolis_step_gauss_ES = 1.0;
-    double metropolis_step_uniform_GS = 1.0;
-    double metropolis_step_uniform_ES = 1.0;
+    double metropolis_step_gauss_GS = 0.75;
+    double metropolis_step_gauss_ES = 1.75;
+    double metropolis_step_uniform_GS = 1.2;
+    double metropolis_step_uniform_ES = 1.6;
     vector<int> seed(4, 0);
     int p1 = 0;
     int p2 = 0;
@@ -47,15 +44,15 @@ int main(int argc, char *argv[]) {
                                 "results_xyz_gauss_GS.dat");
     Gauss_ES = Metropolis_Gauss(x_0_gauss_ES, rnd, metropolis_step_gauss_ES, pdf_wave_function_ES, N, M,
                                 "results_xyz_gauss_ES.dat");
-    Uniform_GS = Metropolis_Gauss(x_0_uniform_GS, rnd, metropolis_step_uniform_GS, pdf_wave_function_GS, N, M,
+    Uniform_GS = Metropolis_Uniform(x_0_uniform_GS, rnd, metropolis_step_uniform_GS, pdf_wave_function_GS, N, M,
                                   "results_xyz_uniform_GS.dat");
-    Uniform_ES = Metropolis_Gauss(x_0_uniform_ES, rnd, metropolis_step_uniform_ES, pdf_wave_function_ES, N, M,
+    Uniform_ES = Metropolis_Uniform(x_0_uniform_ES, rnd, metropolis_step_uniform_ES, pdf_wave_function_ES, N, M,
                                   "results_xyz_uniform_ES.dat");
 
-    cumulativeAverage(get<0>(Gauss_GS), get<1>(Gauss_GS), "results_radius_gauss_GS");
-    cumulativeAverage(get<0>(Gauss_ES), get<1>(Gauss_ES), "results_radius_gauss_ES");
-    cumulativeAverage(get<0>(Uniform_GS), get<1>(Uniform_GS), "results_radius_uniform_GS");
-    cumulativeAverage(get<0>(Uniform_ES), get<1>(Uniform_ES), "results_radius_uniform_ES");
+    cumulativeAverage(get<0>(Gauss_GS), get<1>(Gauss_GS), "results_radius_gauss_GS.dat");
+    cumulativeAverage(get<0>(Gauss_ES), get<1>(Gauss_ES), "results_radius_gauss_ES.dat");
+    cumulativeAverage(get<0>(Uniform_GS), get<1>(Uniform_GS), "results_radius_uniform_GS.dat");
+    cumulativeAverage(get<0>(Uniform_ES), get<1>(Uniform_ES), "results_radius_uniform_ES.dat");
 
 
     rnd.SaveSeed();
