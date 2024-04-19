@@ -8,8 +8,6 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 *****************************************************************
 *****************************************************************/
 
-#include <iostream>
-#include <fstream>
 #include "random.h"
 #include "functions.h"
 #include <vector>
@@ -21,19 +19,19 @@ int main(int argc, char *argv[]) {
 
     Random rnd;
     int M = 1000000; //Throws
-    int N = 100; //Blocks
-    vector<double> x_0_gauss_GS(3, 1.0);
-    vector<double> x_0_gauss_ES(3, 3.0);
-    vector<double> x_0_uniform_GS(3, 1.0);
-    vector<double> x_0_uniform_ES(3, 3.0);
+    int N = 200; //Blocks
+    vector<double> x_0_gauss_GS(3, 1.);
+    vector<double> x_0_gauss_ES(3, 3.);
+    vector<double> x_0_uniform_GS(3, 1.);
+    vector<double> x_0_uniform_ES(3, 3.);
     tuple<vector<double>, vector<double>> Gauss_GS;
     tuple<vector<double>, vector<double>> Gauss_ES;
     tuple<vector<double>, vector<double>> Uniform_GS;
     tuple<vector<double>, vector<double>> Uniform_ES;
     double metropolis_step_gauss_GS = 0.75;
-    double metropolis_step_gauss_ES = 1.75;
+    double metropolis_step_gauss_ES = 1.8;
     double metropolis_step_uniform_GS = 1.2;
-    double metropolis_step_uniform_ES = 1.6;
+    double metropolis_step_uniform_ES = 2.9;
     vector<int> seed(4, 0);
     int p1 = 0;
     int p2 = 0;
@@ -45,9 +43,9 @@ int main(int argc, char *argv[]) {
     Gauss_ES = Metropolis_Gauss(x_0_gauss_ES, rnd, metropolis_step_gauss_ES, pdf_wave_function_ES, N, M,
                                 "results_xyz_gauss_ES.dat");
     Uniform_GS = Metropolis_Uniform(x_0_uniform_GS, rnd, metropolis_step_uniform_GS, pdf_wave_function_GS, N, M,
-                                  "results_xyz_uniform_GS.dat");
+                                    "results_xyz_uniform_GS.dat");
     Uniform_ES = Metropolis_Uniform(x_0_uniform_ES, rnd, metropolis_step_uniform_ES, pdf_wave_function_ES, N, M,
-                                  "results_xyz_uniform_ES.dat");
+                                    "results_xyz_uniform_ES.dat");
 
     cumulativeAverage(get<0>(Gauss_GS), get<1>(Gauss_GS), "results_radius_gauss_GS.dat");
     cumulativeAverage(get<0>(Gauss_ES), get<1>(Gauss_ES), "results_radius_gauss_ES.dat");
