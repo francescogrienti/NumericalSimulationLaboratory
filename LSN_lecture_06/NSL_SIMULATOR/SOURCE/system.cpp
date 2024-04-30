@@ -155,84 +155,168 @@ System::initialize() { // Initialize the System object according to the content 
     Seed >> seed[0] >> seed[1] >> seed[2] >> seed[3];
     _rnd.SetRandom(seed, p1, p2);
 
-    ofstream couta("../OUTPUT/acceptance.dat"); // Set the heading line in file ../OUTPUT/acceptance.dat
-    couta << "#   N_BLOCK:  ACCEPTANCE:" << endl;
-    couta.close();
+    if (_sim_type == 2) {
+        ofstream couta(
+                "../OUTPUT/OUTPUT_METROPOLIS/acceptance.dat"); // Set the heading line in file ../OUTPUT/acceptance.dat
+        couta << "#   N_BLOCK:  ACCEPTANCE:" << endl;
+        couta.close();
+    } else if (_sim_type == 3) {
+        ofstream couta(
+                "../OUTPUT/OUTPUT_GIBBS/acceptance.dat"); // Set the heading line in file ../OUTPUT/acceptance.dat
+        couta << "#   N_BLOCK:  ACCEPTANCE:" << endl;
+        couta.close();
+    }
+
 
     ifstream input("../INPUT/input.dat"); // Start reading ../INPUT/input.dat
     ofstream coutf;
-    coutf.open("../OUTPUT/output.dat");
-    string property;
-    double delta;
-    while (!input.eof()) {
-        input >> property;
-        if (property == "SIMULATION_TYPE") {
-            input >> _sim_type;
-            if (_sim_type > 1) {
-                input >> _J;
-                input >> _H;
-            }
-            if (_sim_type > 3) {
-                cerr << "PROBLEM: unknown simulation type" << endl;
-                exit(EXIT_FAILURE);
-            }
-            if (_sim_type == 0) coutf << "LJ MOLECULAR DYNAMICS (NVE) SIMULATION" << endl;
-            else if (_sim_type == 1) coutf << "LJ MONTE CARLO (NVT) SIMULATION" << endl;
-            else if (_sim_type == 2) coutf << "ISING 1D MONTE CARLO (MRT^2) SIMULATION" << endl;
-            else if (_sim_type == 3) coutf << "ISING 1D MONTE CARLO (GIBBS) SIMULATION" << endl;
-        } else if (property == "RESTART") {
-            input >> _restart;
-        } else if (property == "TEMP") {
-            input >> _temp;
-            _beta = 1.0 / _temp;
-            coutf << "TEMPERATURE= " << _temp << endl;
-        } else if (property == "NPART") {
-            input >> _npart;
-            _fx.resize(_npart);
-            _fy.resize(_npart);
-            _fz.resize(_npart);
-            _particle.set_size(_npart);
-            for (int i = 0; i < _npart; i++) {
-                _particle(i).initialize();
-                if (_rnd.Rannyu() > 0.5) _particle(i).flip(); // to randomize the spin configuration
-            }
-            coutf << "NPART= " << _npart << endl;
-        } else if (property == "RHO") {
-            input >> _rho;
-            _volume = _npart / _rho;
-            _side.resize(_ndim);
-            _halfside.resize(_ndim);
-            double side = pow(_volume, 1.0 / 3.0);
-            for (int i = 0; i < _ndim; i++) _side(i) = side;
-            _halfside = 0.5 * _side;
-            coutf << "SIDE= ";
-            for (int i = 0; i < _ndim; i++) {
-                coutf << setw(12) << _side[i];
-            }
-            coutf << endl;
-        } else if (property == "R_CUT") {
-            input >> _r_cut;
-            coutf << "R_CUT= " << _r_cut << endl;
-        } else if (property == "DELTA") {
-            input >> delta;
-            coutf << "DELTA= " << delta << endl;
-            _delta = delta;
-        } else if (property == "NBLOCKS") {
-            input >> _nblocks;
-            coutf << "NBLOCKS= " << _nblocks << endl;
-        } else if (property == "NSTEPS") {
-            input >> _nsteps;
-            coutf << "NSTEPS= " << _nsteps << endl;
-        } else if (property == "ENDINPUT") {
-            coutf << "Reading input completed!" << endl;
-            break;
-        } else cerr << "PROBLEM: unknown input" << endl;
+    if (_sim_type == 2) {
+        coutf.open("../OUTPUT/OUTPUT_METROPOLIS/output.dat");
+        string property;
+        double delta;
+        while (!input.eof()) {
+            input >> property;
+            if (property == "SIMULATION_TYPE") {
+                input >> _sim_type;
+                if (_sim_type > 1) {
+                    input >> _J;
+                    input >> _H;
+                }
+                if (_sim_type > 3) {
+                    cerr << "PROBLEM: unknown simulation type" << endl;
+                    exit(EXIT_FAILURE);
+                }
+                if (_sim_type == 0) coutf << "LJ MOLECULAR DYNAMICS (NVE) SIMULATION" << endl;
+                else if (_sim_type == 1) coutf << "LJ MONTE CARLO (NVT) SIMULATION" << endl;
+                else if (_sim_type == 2) coutf << "ISING 1D MONTE CARLO (MRT^2) SIMULATION" << endl;
+                else if (_sim_type == 3) coutf << "ISING 1D MONTE CARLO (GIBBS) SIMULATION" << endl;
+            } else if (property == "RESTART") {
+                input >> _restart;
+            } else if (property == "TEMP") {
+                input >> _temp;
+                _beta = 1.0 / _temp;
+                coutf << "TEMPERATURE= " << _temp << endl;
+            } else if (property == "NPART") {
+                input >> _npart;
+                _fx.resize(_npart);
+                _fy.resize(_npart);
+                _fz.resize(_npart);
+                _particle.set_size(_npart);
+                for (int i = 0; i < _npart; i++) {
+                    _particle(i).initialize();
+                    if (_rnd.Rannyu() > 0.5) _particle(i).flip(); // to randomize the spin configuration
+                }
+                coutf << "NPART= " << _npart << endl;
+            } else if (property == "RHO") {
+                input >> _rho;
+                _volume = _npart / _rho;
+                _side.resize(_ndim);
+                _halfside.resize(_ndim);
+                double side = pow(_volume, 1.0 / 3.0);
+                for (int i = 0; i < _ndim; i++) _side(i) = side;
+                _halfside = 0.5 * _side;
+                coutf << "SIDE= ";
+                for (int i = 0; i < _ndim; i++) {
+                    coutf << setw(12) << _side[i];
+                }
+                coutf << endl;
+            } else if (property == "R_CUT") {
+                input >> _r_cut;
+                coutf << "R_CUT= " << _r_cut << endl;
+            } else if (property == "DELTA") {
+                input >> delta;
+                coutf << "DELTA= " << delta << endl;
+                _delta = delta;
+            } else if (property == "NBLOCKS") {
+                input >> _nblocks;
+                coutf << "NBLOCKS= " << _nblocks << endl;
+            } else if (property == "NSTEPS") {
+                input >> _nsteps;
+                coutf << "NSTEPS= " << _nsteps << endl;
+            } else if (property == "ENDINPUT") {
+                coutf << "Reading input completed!" << endl;
+                break;
+            } else cerr << "PROBLEM: unknown input" << endl;
+        }
+        input.close();
+        this->read_configuration();
+        this->initialize_velocities();
+        coutf << "System initialized!" << endl;
+        coutf.close();
+    } else if (_sim_type == 3) {
+        coutf.open("../OUTPUT/OUTPUT_GIBBS/output.dat");
+        string property;
+        double delta;
+        while (!input.eof()) {
+            input >> property;
+            if (property == "SIMULATION_TYPE") {
+                input >> _sim_type;
+                if (_sim_type > 1) {
+                    input >> _J;
+                    input >> _H;
+                }
+                if (_sim_type > 3) {
+                    cerr << "PROBLEM: unknown simulation type" << endl;
+                    exit(EXIT_FAILURE);
+                }
+                if (_sim_type == 0) coutf << "LJ MOLECULAR DYNAMICS (NVE) SIMULATION" << endl;
+                else if (_sim_type == 1) coutf << "LJ MONTE CARLO (NVT) SIMULATION" << endl;
+                else if (_sim_type == 2) coutf << "ISING 1D MONTE CARLO (MRT^2) SIMULATION" << endl;
+                else if (_sim_type == 3) coutf << "ISING 1D MONTE CARLO (GIBBS) SIMULATION" << endl;
+            } else if (property == "RESTART") {
+                input >> _restart;
+            } else if (property == "TEMP") {
+                input >> _temp;
+                _beta = 1.0 / _temp;
+                coutf << "TEMPERATURE= " << _temp << endl;
+            } else if (property == "NPART") {
+                input >> _npart;
+                _fx.resize(_npart);
+                _fy.resize(_npart);
+                _fz.resize(_npart);
+                _particle.set_size(_npart);
+                for (int i = 0; i < _npart; i++) {
+                    _particle(i).initialize();
+                    if (_rnd.Rannyu() > 0.5) _particle(i).flip(); // to randomize the spin configuration
+                }
+                coutf << "NPART= " << _npart << endl;
+            } else if (property == "RHO") {
+                input >> _rho;
+                _volume = _npart / _rho;
+                _side.resize(_ndim);
+                _halfside.resize(_ndim);
+                double side = pow(_volume, 1.0 / 3.0);
+                for (int i = 0; i < _ndim; i++) _side(i) = side;
+                _halfside = 0.5 * _side;
+                coutf << "SIDE= ";
+                for (int i = 0; i < _ndim; i++) {
+                    coutf << setw(12) << _side[i];
+                }
+                coutf << endl;
+            } else if (property == "R_CUT") {
+                input >> _r_cut;
+                coutf << "R_CUT= " << _r_cut << endl;
+            } else if (property == "DELTA") {
+                input >> delta;
+                coutf << "DELTA= " << delta << endl;
+                _delta = delta;
+            } else if (property == "NBLOCKS") {
+                input >> _nblocks;
+                coutf << "NBLOCKS= " << _nblocks << endl;
+            } else if (property == "NSTEPS") {
+                input >> _nsteps;
+                coutf << "NSTEPS= " << _nsteps << endl;
+            } else if (property == "ENDINPUT") {
+                coutf << "Reading input completed!" << endl;
+                break;
+            } else cerr << "PROBLEM: unknown input" << endl;
+        }
+        input.close();
+        this->read_configuration();
+        this->initialize_velocities();
+        coutf << "System initialized!" << endl;
+        coutf.close();
     }
-    input.close();
-    this->read_configuration();
-    this->initialize_velocities();
-    coutf << "System initialized!" << endl;
-    coutf.close();
     return;
 }
 
@@ -311,6 +395,7 @@ void System::initialize_properties() { // Initialize data members used for measu
         while (!input.eof()) {
             input >> property;
             if (property == "POTENTIAL_ENERGY") {
+                cout << "pippo" << endl;
                 ofstream coutp("../OUTPUT/potential_energy.dat");
                 coutp << "#     BLOCK:  ACTUAL_PE:     PE_AVE:      ERROR:" << endl;
                 coutp.close();
@@ -320,6 +405,7 @@ void System::initialize_properties() { // Initialize data members used for measu
                 index_property++;
                 _vtail = 0.0; // TO BE FIXED IN EXERCISE 7
             } else if (property == "KINETIC_ENERGY") {
+                cout << "pippo" << endl;
                 ofstream coutk("../OUTPUT/kinetic_energy.dat");
                 coutk << "#     BLOCK:   ACTUAL_KE:    KE_AVE:      ERROR:" << endl;
                 coutk.close();
@@ -387,11 +473,19 @@ void System::initialize_properties() { // Initialize data members used for measu
                 _index_chi = index_property;
                 index_property++;
             } else if (property == "ENDPROPERTIES") {
-                ofstream coutf;
-                coutf.open("../OUTPUT/output.dat", ios::app);
-                coutf << "Reading properties completed!" << endl;
-                coutf.close();
-                break;
+                if (_sim_type == 2) {
+                    ofstream coutf;
+                    coutf.open("../OUTPUT/OUTPUT_METROPOLIS/output.dat", ios::app);
+                    coutf << "Reading properties completed!" << endl;
+                    coutf.close();
+                    break;
+                } else if (_sim_type == 3) {
+                    ofstream coutf;
+                    coutf.open("../OUTPUT/OUTPUT_GIBBS/output.dat", ios::app);
+                    coutf << "Reading properties completed!" << endl;
+                    coutf.close();
+                    break;
+                }
             } else cerr << "PROBLEM: unknown property" << endl;
         }
         input.close();
@@ -415,9 +509,16 @@ void System::finalize() {
     this->write_configuration();
     _rnd.SaveSeed();
     ofstream coutf;
-    coutf.open("../OUTPUT/output.dat", ios::app);
-    coutf << "Simulation completed!" << endl;
-    coutf.close();
+    if (_sim_type == 2) {
+        coutf.open("../OUTPUT/OUTPUT_METROPOLIS/output.dat", ios::app);
+        coutf << "Simulation completed!" << endl;
+        coutf.close();
+    } else if (_sim_type == 3) {
+        coutf.open("../OUTPUT/OUTPUT_GIBBS/output.dat", ios::app);
+        coutf << "Simulation completed!" << endl;
+        coutf.close();
+    }
+
     string filename = "../INPUT/input.dat";
     string tempKey = "TEMP";
 
@@ -545,11 +646,11 @@ void System::block_reset(int blk) { // Reset block accumulators to zero
     ofstream coutf;
     if (blk > 0) {
         if (_sim_type == 2) {
-            coutf.open("../OUTPUT_METROPOLIS/output.dat", ios::app);
+            coutf.open("../OUTPUT/OUTPUT_METROPOLIS/output.dat", ios::app);
             coutf << "Block completed: " << blk << endl;
             coutf.close();
         } else if (_sim_type == 3) {
-            coutf.open("../OUTPUT_GIBBS/output.dat", ios::app);
+            coutf.open("../OUTPUT/OUTPUT_GIBBS/output.dat", ios::app);
             coutf << "Block completed: " << blk << endl;
             coutf.close();
         }
@@ -749,13 +850,13 @@ void System::averages(int blk) {
         // coutf.close();
         if (blk == _nblocks) {
             if (_sim_type == 2) {
-                coutf.open("../OUTPUT_METROPOLIS/magnetization_temp.dat", ios::app);
+                coutf.open("../OUTPUT/OUTPUT_METROPOLIS/magnetization_temp.dat", ios::app);
                 coutf << setw(12) << _temp
                       << setw(12) << sum_average / double(blk)
                       << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
                 coutf.close();
             } else if (_sim_type == 3) {
-                coutf.open("../OUTPUT_GIBBS/magnetization_temp.dat", ios::app);
+                coutf.open("../OUTPUT/OUTPUT_GIBBS/magnetization_temp.dat", ios::app);
                 coutf << setw(12) << _temp
                       << setw(12) << sum_average / double(blk)
                       << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
@@ -777,13 +878,13 @@ void System::averages(int blk) {
         // coutf.close();
         if (blk == _nblocks) {
             if (_sim_type == 2) {
-                coutf.open("../OUTPUT_METROPOLIS/specific_heat_temp.dat", ios::app);
+                coutf.open("../OUTPUT/OUTPUT_METROPOLIS/specific_heat_temp.dat", ios::app);
                 coutf << setw(12) << _temp
                       << setw(12) << sum_average / double(blk)
                       << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
                 coutf.close();
             } else if (_sim_type == 3) {
-                coutf.open("../OUTPUT_GIBBS/specific_heat_temp.dat", ios::app);
+                coutf.open("../OUTPUT/OUTPUT_GIBBS/specific_heat_temp.dat", ios::app);
                 coutf << setw(12) << _temp
                       << setw(12) << sum_average / double(blk)
                       << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
@@ -804,13 +905,13 @@ void System::averages(int blk) {
         //coutf.close();
         if (blk == _nblocks) {
             if (_sim_type == 2) {
-                coutf.open("../OUTPUT_METROPOLIS/susceptibility_temp.dat", ios::app);
+                coutf.open("../OUTPUT/OUTPUT_METROPOLIS/susceptibility_temp.dat", ios::app);
                 coutf << setw(12) << _temp
                       << setw(12) << sum_average / double(blk)
                       << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
                 coutf.close();
             } else if (_sim_type == 3) {
-                coutf.open("../OUTPUT_GIBBS/susceptibility_temp.dat", ios::app);
+                coutf.open("../OUTPUT/OUTPUT_GIBBS/susceptibility_temp.dat", ios::app);
                 coutf << setw(12) << _temp
                       << setw(12) << sum_average / double(blk)
                       << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
@@ -821,13 +922,13 @@ void System::averages(int blk) {
     // ACCEPTANCE ////////////////////////////////////////////////////////////////
     double fraction;
     if (_sim_type == 2) {
-        coutf.open("../OUTPUT_METROPOLIS/acceptance.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_METROPOLIS/acceptance.dat", ios::app);
         if (_nattempts > 0) fraction = double(_naccepted) / double(_nattempts);
         else fraction = 0.0;
         coutf << setw(12) << blk << setw(12) << fraction << endl;
         coutf.close();
     } else if (_sim_type == 3) {
-        coutf.open("../OUTPUT_GIBBS/acceptance.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_GIBBS/acceptance.dat", ios::app);
         if (_nattempts > 0) fraction = double(_naccepted) / double(_nattempts);
         else fraction = 0.0;
         coutf << setw(12) << blk << setw(12) << fraction << endl;

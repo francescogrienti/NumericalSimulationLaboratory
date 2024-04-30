@@ -1,7 +1,6 @@
 #!/bin/bash
 
 max_temperature=2.0
-
 temporary_temperature=0.3
 
 function execute_program() {
