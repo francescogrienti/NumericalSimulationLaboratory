@@ -65,18 +65,21 @@ private:
 public: // Function declarations
   int get_nbl();              // Get the number of blocks
   int get_nsteps();           // Get the number of steps in each block
-  void initialize();          // Initialize system properties
-  void initialize_properties();// Initialize properties for measurement
-  void finalize();            // Finalize system and clean up
+  void initialize(string method);          // Initialize system properties
+  void initialize_eq(string method);       // Initialize system properties for equilibration
+  void initialize_properties(string method);// Initialize properties for measurement
+  void initialize_properties_eq(string method);// Initialize properties for measurement for equilibration
+  void finalize(string method);            // Finalize system and clean up
   void write_configuration(); // Write final system configuration to XYZ file
   void write_XYZ(int nconf);  // Write system configuration in XYZ format on the fly
   void write_velocities();    // Write final particle velocities to file
   void read_configuration();  // Read system configuration from file
   void initialize_velocities();// Initialize particle velocities
   void step();                // Perform a simulation step
-  void block_reset(int blk);  // Reset block averages
-  void measure();             // Measure properties of the system
-  void averages(int blk);     // Compute averages of properties
+  void block_reset(int blk, string method);  // Reset block averages
+  void measure();             // Measure properties of the system for equilibration
+  void measure_eq(string method);             // Measure properties of the system for equilibration
+  void averages(int blk, string method);     // Compute averages of properties
   double error(double acc, double acc2, int blk); // Compute error
   void move(int part);        // Move a particle
   bool metro(int part);       // Perform Metropolis acceptance-rejection step

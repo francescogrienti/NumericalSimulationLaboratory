@@ -15,5 +15,6 @@ random.o : random.cpp random.h
 clean :
 	rm *.o simulator.exe
 remove:
-	rm ../OUTPUT/*.*
+	rm ../OUTPUT/OUTPUT_GIBBS/*.*
+	rm ../OUTPUT/OUTPUT_METROPOLIS/*.*
 	rm ../OUTPUT/CONFIG/*.*
