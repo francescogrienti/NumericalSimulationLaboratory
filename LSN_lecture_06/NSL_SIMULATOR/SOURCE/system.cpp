@@ -654,8 +654,8 @@ void System::finalize(string method) {
             string key;
             double tempValue;
             iss >> key >> tempValue;
-            double increment = 0.10;
-            tempValue += increment;
+            double decrement = 0.10;
+            tempValue -= decrement;
             modifiedContent << key << "                   " << tempValue << endl;
         } else {
             modifiedContent << line << endl;
@@ -667,6 +667,31 @@ void System::finalize(string method) {
     ofstream outfile(filename);
     outfile << modifiedContent.str();
     outfile.close();
+
+    string RestartKey = "RESTART";
+
+    ifstream infile1(filename);
+    string line1;
+    ostringstream modifiedContent1;
+
+    while (getline(infile1, line1)) {
+        if (line1.substr(0, RestartKey.size()) == RestartKey) {
+            istringstream iss(line1);
+            string key1;
+            double RestartValue;
+            iss >> key1 >> RestartValue;
+            RestartValue = 1;
+            modifiedContent1 << key1 << "                " << RestartValue << endl;
+        } else {
+            modifiedContent1 << line1 << endl;
+        }
+    }
+
+    infile1.close();
+
+    ofstream outfile1(filename);
+    outfile1 << modifiedContent1.str();
+    outfile1.close();
 
     return;
 }

@@ -16,5 +16,5 @@ clean :
 	rm *.o simulator.exe
 remove:
 	rm ../OUTPUT/OUTPUT_GIBBS/*.*
-	rm ../OUTPUT/OUTPUT_METROPOLIS/*.*
 	rm ../OUTPUT/CONFIG/*.*
+	rm ../INPUT/CONFIG/config.spin

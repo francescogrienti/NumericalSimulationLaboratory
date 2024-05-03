@@ -12,6 +12,7 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include "system.h"
 
 
+/*
 void equilibration(string method) {
     int nconf = 1;
     System SYS;
@@ -30,6 +31,9 @@ void equilibration(string method) {
     }
     return;
 }
+*/
+//La simulazione parte dalla temperatura più elevata perché il sistema, essendo maggiormente disordinato, si trova più vicino
+//all'equilibrio, quindi impiega pochi passi per raggiungere l'equilibrio.
 
 
 using namespace std;
@@ -47,10 +51,10 @@ int main(int argc, char *argv[]) {
     // Convert the argument to an integer
     string method = argv[1];
 
-    System SYS;
-    equilibration(method);
+    //System SYS;
+    //equilibration(method);
 
-    /*
+
     int nconf = 1;
     System SYS;
     SYS.initialize(method);
@@ -70,7 +74,6 @@ int main(int argc, char *argv[]) {
         SYS.block_reset(i + 1, method);
     }
     SYS.finalize(method);
-     */
 
     return 0;
 }

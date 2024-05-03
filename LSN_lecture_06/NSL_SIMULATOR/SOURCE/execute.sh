@@ -1,7 +1,7 @@
 #!/bin/bash
 
-max_temperature=2.0
-temporary_temperature=0.3
+temporary_temperature=2.0
+min_temperature=0.3
 
   # Leggi la stringa in input
         read -p "Inserisci una stringa di input: " input_string
@@ -15,6 +15,7 @@ function execute_program() {
 
         if [ $? -eq 0 ]; then
             echo "Il programma è stato eseguito correttamente."
+            mv  ../OUTPUT/CONFIG/config.spin ../INPUT/CONFIG/
         else
             echo "Si è verificato un errore durante l'esecuzione del programma."
         fi
@@ -24,7 +25,7 @@ function execute_program() {
 }
 make clean
 make remove
-while (( $(echo "$temporary_temperature <= $max_temperature" | bc -l) )); do
+while (( $(echo "$temporary_temperature >= $min_temperature" | bc -l) )); do
     execute_program
-    temporary_temperature=$(echo "$temporary_temperature + 0.10" | bc)
+    temporary_temperature=$(echo "$temporary_temperature - 0.10" | bc)
 done
