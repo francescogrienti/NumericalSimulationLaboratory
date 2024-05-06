@@ -1,11 +1,11 @@
 ISING 1D MONTE CARLO (GIBBS) SIMULATION
-TEMPERATURE= 2
+TEMPERATURE= 1.5
 NPART= 50
 SIDE=      3.68403     3.68403     3.68403
 R_CUT= 0
 DELTA= 0
-NBLOCKS= 10
-NSTEPS= 100
+NBLOCKS= 1
+NSTEPS= 1000
 Reading input completed!
 System initialized!
 Reading properties completed!

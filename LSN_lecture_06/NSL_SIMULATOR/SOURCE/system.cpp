@@ -25,6 +25,12 @@ void System::step() { // Perform a simulation step
     return;
 }
 
+void System::step_eq(int i) { // Perform a simulation step
+    this->move(i); // Perform a MC step on a randomly choosen particle
+    //_nattempts += _npart; //update number of attempts performed on the system
+    return;
+}
+
 void System::Verlet() {
     double xnew, ynew, znew;
     for (int i = 0; i < _npart; i++) { //Force acting on particle i
@@ -114,7 +120,6 @@ bool System::metro(int i) { // Metropolis algorithm
     if (_rnd.Rannyu() < acceptance) decision = true; //Metropolis acceptance step
     return decision;
 }
-
 double System::Boltzmann(int i, bool xnew) {
     double energy_i = 0.0;
     double dx, dy, dz, dr;

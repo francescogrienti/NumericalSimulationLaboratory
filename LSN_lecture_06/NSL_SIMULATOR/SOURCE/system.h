@@ -76,6 +76,7 @@ public: // Function declarations
   void read_configuration();  // Read system configuration from file
   void initialize_velocities();// Initialize particle velocities
   void step();                // Perform a simulation step
+  void step_eq(int i);                // Perform a simulation step
   void block_reset(int blk, string method);  // Reset block averages
   void measure();             // Measure properties of the system for equilibration
   void measure_eq(string method);             // Measure properties of the system for equilibration
