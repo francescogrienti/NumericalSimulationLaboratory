@@ -25,22 +25,22 @@ std::string toLowerCase(const std::string &str) {
 using namespace std;
 using namespace arma;
 
-void System::step() { // Perform a simulation step
+void System::step(string phase) { // Perform a simulation step
     if (_restart) {
         if (_sim_type == 0) this->Verlet();  // Perform a MD step
         else
             for (int i = 0; i < _npart; i++)
-                this->move(int(_rnd.Rannyu() * _npart)); // Perform a MC step on a randomly choosen particle
+                this->move(int(_rnd.Rannyu() * _npart), phase); // Perform a MC step on a randomly choosen particle
         _nattempts += _npart; //update number of attempts performed on the system
     }
     return;
 }
 
-void System::step_restart() { // Perform a simulation step
+void System::step_restart(string phase) { // Perform a simulation step
     if (_sim_type == 0) this->Verlet();  // Perform a MD step
     else
         for (int i = 0; i < _npart; i++)
-            this->move(int(_rnd.Rannyu() * _npart)); // Perform a MC step on a randomly choosen particle
+            this->move(int(_rnd.Rannyu() * _npart), phase); // Perform a MC step on a randomly choosen particle
     _nattempts += _npart; //update number of attempts performed on the system
 
     return;
@@ -94,7 +94,7 @@ double System::Force(int i, int dim) {
     return f;
 }
 
-void System::move(int i) { // Propose a MC move for particle i
+void System::move(int i, string phase) { // Propose a MC move for particle i
     if (_sim_type == 3) { //Gibbs sampler for Ising
         // TO BE FIXED IN EXERCISE 6
     } else {           // M(RT)^2
@@ -104,12 +104,12 @@ void System::move(int i) { // Propose a MC move for particle i
                 shift(j) = _rnd.Rannyu(-1.0, 1.0) * _delta; // uniform distribution in [-_delta;_delta)
             }
             _particle(i).translate(shift, _side);  //Call the function Particle::translate
-            if (this->metro(i)) { //Metropolis acceptance evaluation
+            if (this->metro(i, phase)) { //Metropolis acceptance evaluation
                 _particle(i).acceptmove();
                 _naccepted++;
             } else _particle(i).moveback(); //If translation is rejected, restore the old configuration
         } else {                  // Ising 1D
-            if (this->metro(i)) {     //Metropolis acceptance evaluation for a spin flip involving spin i
+            if (this->metro(i, phase)) {     //Metropolis acceptance evaluation for a spin flip involving spin i
                 _particle(i).flip();  //If accepted, the spin i is flipped
                 _naccepted++;
             }
@@ -118,7 +118,7 @@ void System::move(int i) { // Propose a MC move for particle i
     return;
 }
 
-bool System::metro(int i) { // Metropolis algorithm
+bool System::metro(int i, string phase) { // Metropolis algorithm
     bool decision = false;
     double delta_E, acceptance;
     if (_sim_type == 1) delta_E = this->Boltzmann(i, true) - this->Boltzmann(i, false);
@@ -173,7 +173,7 @@ System::initialize(
 
     ofstream couta(
             "../OUTPUT/OUTPUT_" + phase + "/acceptance.dat"); // Set the heading line in file ../OUTPUT/acceptance.dat
-    couta << "#   N_BLOCK:  ACCEPTANCE:" << endl;
+    couta << "#  ACCEPTANCE:" << endl;
     couta.close();
 
     ifstream input("../INPUT/INPUT_EXAMPLES/input." + toLowerCase(phase)); // Start reading ../INPUT/input.dat
@@ -721,6 +721,14 @@ void System::measure(string phase) { // Measure properties
 // TO BE FIXED IN EXERCISE 6
 
     _block_av += _measurement; //Update block accumulators
+
+    ofstream coutf;
+    double fraction;
+    coutf.open("../OUTPUT/OUTPUT_" + phase + "/acceptance.dat", ios::app);
+    if (_nattempts > 0) fraction = double(_naccepted) / double(_nattempts);
+    else fraction = 0.0;
+    coutf<< setw(12) << fraction << endl;
+    coutf.close();
 
     return;
 }

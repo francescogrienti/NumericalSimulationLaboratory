@@ -75,15 +75,15 @@ public: // Function declarations
     void read_configuration(string phase);  // Read system configuration from file
     void initialize_velocities();// Initialize particle velocities
     void initialize_velocities(string phase);// Initialize particle velocities
-    void step();                // Perform a simulation step
-    void step_restart();                // Perform a simulation step
+    void step(string phase);                // Perform a simulation step
+    void step_restart(string phase);                // Perform a simulation step
     void block_reset(int blk, string phase);  // Reset block averages
     void measure(string phase);             // Measure properties of the system
     void measure_temp();
     void averages(int blk, string phase);     // Compute averages of properties
     double error(double acc, double acc2, int blk); // Compute error
-    void move(int part);        // Move a particle
-    bool metro(int part);       // Perform Metropolis acceptance-rejection step
+    void move(int part, string phase);        // Move a particle
+    bool metro(int part, string phase);       // Perform Metropolis acceptance-rejection step
     double pbc(double position, int i); // Apply periodic boundary conditions for coordinates
     int pbc(int i);             // Apply periodic boundary conditions for spins
     void Verlet();              // Perform Verlet integration step

@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
                 breaking = true;
                 SYS.write_configuration(phase);
             } else {
-                SYS.step();
+                SYS.step(phase);
                 SYS.measure_temp();
             }
         }
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     SYS.initialize_velocities(phase);
     for (int i = 0; i < SYS.get_nbl(); i++) { //loop over blocks
         for (int j = 0; j < SYS.get_nsteps(); j++) { //loop over steps in a block
-            SYS.step_restart();
+            SYS.step_restart(phase);
             SYS.measure(phase);
             if (j % 10 == 0) {
 //              SYS.write_XYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"!

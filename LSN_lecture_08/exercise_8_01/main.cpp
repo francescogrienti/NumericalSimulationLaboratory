@@ -20,10 +20,10 @@ int main(int argc, char *argv[]) {
     Random rnd;
     int M = 10000; //Throws
     int N = 200; //Blocks
-    double x = 2.4; //Starting point
+    double x = 1.; //Starting point
     tuple<vector<double>, vector<double>> hamiltonian_GS;
-    double metropolis_step = 4.1;
-    double mu = 1.2;
+    double metropolis_step = 2.1;
+    double mu = 1.1;
     double sigma = 1.;
     vector<int> seed(4, 0);
     int p1 = 0;
