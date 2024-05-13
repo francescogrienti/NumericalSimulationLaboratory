@@ -347,7 +347,8 @@ void System::initialize_properties() { // Initialize data members used for measu
                 index_property++;
                 _ptail = 0.0; // TO BE FIXED IN EXERCISE 7
             } else if (property == "GOFR") {
-                ofstream coutgr("../OUTPUT/gofr.dat");
+                ofstream coutgr("../OUTPUT/gofr_ave.dat");
+                ofstream coutgr2("../OUTPUT/gofr_blocks.dat");
                 coutgr << "# DISTANCE:     AVE_GOFR:        ERROR:" << endl;
                 coutgr.close();
                 input >> _n_bins;
@@ -538,7 +539,10 @@ void System::measure() { // Measure properties
                 distance(1) = this->pbc(_particle(i).getposition(1, true) - _particle(j).getposition(1, true), 1);
                 distance(2) = this->pbc(_particle(i).getposition(2, true) - _particle(j).getposition(2, true), 2);
                 dr = sqrt(dot(distance, distance));
-                // GOFR ... TO BE FIXED IN EXERCISE 7
+                if (dr < _halfside[0]) {
+                    bin = dr / _bin_size;
+                    _measurement(_index_gofr + bin) += 2;
+                }
                 if (dr < _r_cut) {
                     if (_measure_penergy) penergy_temp += 1.0 / pow(dr, 12) - 1.0 / pow(dr, 6); // POTENTIAL ENERGY
                     if (_measure_pressure)
@@ -584,14 +588,6 @@ void System::measure() { // Measure properties
         pressure_temp = ptail + (_rho * (2.0 / 3.0) * kenergy_temp) + (pressure_temp / double(_npart));
         _measurement(_index_pressure) = pressure_temp;
     }
-// TO BE FIXED IN EXERCISE 4
-    // MAGNETIZATION /////////////////////////////////////////////////////////////
-// TO BE FIXED IN EXERCISE 6
-    // SPECIFIC HEAT /////////////////////////////////////////////////////////////
-// TO BE FIXED IN EXERCISE 6
-    // SUSCEPTIBILITY ////////////////////////////////////////////////////////////
-// TO BE FIXED IN EXERCISE 6
-
     _block_av += _measurement; //Update block accumulators
 
     return;
@@ -667,13 +663,37 @@ void System::averages(int blk) {
         coutf.close();
     }
     // GOFR //////////////////////////////////////////////////////////////////////
-    // TO BE FIXED IN EXERCISE 7
-    // MAGNETIZATION /////////////////////////////////////////////////////////////
-    // TO BE FIXED IN EXERCISE 6
-    // SPECIFIC HEAT /////////////////////////////////////////////////////////////
-    // TO BE FIXED IN EXERCISE 6
-    // SUSCEPTIBILITY ////////////////////////////////////////////////////////////
-    // TO BE FIXED IN EXERCISE 6
+    //FIX the separated file!!!
+    if (_measure_gofr) {
+        coutf.open("../OUTPUT/gofr_ave.dat", ios::app);
+        coutf.open("../OUTPUT/gofr_blocks.dat", ios::app);
+        for (int i = _index_gofr; i < _nprop; i++) {
+            double r = (i - _index_gofr) * _bin_size;
+            double norm = 1. / ((4. / 3.) * M_PI * (pow((r + _bin_size), 3) - pow(r, 3)) * _rho * _npart);
+            average = norm * _average(i);
+            sum_average = _global_av(i);
+            sum_ave2 = _global_av2(i);
+            coutf << average << " ";
+            coutf << setw(12) << blk
+                  << setw(12) << average
+                  << setw(12) << sum_average / double(blk)
+                  << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
+            coutf.close();
+        }
+        coutf << endl;
+        coutf.close();
+        /*
+        //Separated file with final average value and statistical uncertainties
+        average = _average(_index_gofr + i);
+        sum_average = _global_av(_index_gofr + i);
+        sum_ave2 = _global_av2(_index_gofr + i);
+        coutf << setw(12) << blk
+              << setw(12) << average
+              << setw(12) << sum_average / double(blk)
+              << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
+        coutf.close();
+         */
+    }
     // ACCEPTANCE ////////////////////////////////////////////////////////////////
     double fraction;
     coutf.open("../OUTPUT/acceptance.dat", ios::app);
