@@ -159,7 +159,8 @@ int System::pbc(int i) { // Enforce periodic boundary conditions for spins
 
 void
 System::initialize(
-        string phase) { // Initialize the System object according to the content of the input files in the ../INPUT/ directory
+        string phase,
+        string sim_type) { // Initialize the System object according to the content of the input files in the ../INPUT/ directory
 
     int p1, p2; // Read from ../INPUT/Primes a pair of numbers to be used to initialize the RNG
     ifstream Primes("../INPUT/Primes");
@@ -171,13 +172,14 @@ System::initialize(
     _rnd.SetRandom(seed, p1, p2);
 
     ofstream couta(
-            "../OUTPUT/OUTPUT_" + phase + "/acceptance.dat"); // Set the heading line in file ../OUTPUT/acceptance.dat
+            "../OUTPUT/OUTPUT_" + phase + "/acceptance_" + sim_type +
+            ".dat"); // Set the heading line in file ../OUTPUT/acceptance.dat
     couta << "#  ACCEPTANCE:" << endl;
     couta.close();
 
     ifstream input("../INPUT/INPUT_EXAMPLES/input." + toLowerCase(phase)); // Start reading ../INPUT/input.dat
     ofstream coutf;
-    coutf.open("../OUTPUT/OUTPUT_" + phase + "/output.dat");
+    coutf.open("../OUTPUT/OUTPUT_" + phase + "/output_" + sim_type + ".dat");
     string property;
     double delta;
     while (!input.eof()) {
@@ -311,10 +313,10 @@ void System::initialize_velocities() {
     return;
 }
 
-void System::initialize_velocities(string phase) {
+void System::initialize_velocities(string phase, string sim_type) {
     if (_sim_type == 0) {
         ifstream cinf;
-        cinf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/velocities.out");
+        cinf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/velocities_" + sim_type + ".out");
         if (cinf.is_open()) {
             double vx, vy, vz;
             for (int i = 0; i < _npart; i++) {
@@ -367,7 +369,8 @@ void System::initialize_velocities(string phase) {
     return;
 }
 
-void System::initialize_properties(string phase) { // Initialize data members used for measurement of properties
+void System::initialize_properties(string phase,
+                                   string sim_type) { // Initialize data members used for measurement of properties
 
     string property;
     int index_property = 0;
@@ -387,16 +390,16 @@ void System::initialize_properties(string phase) { // Initialize data members us
         while (!input.eof()) {
             input >> property;
             if (property == "POTENTIAL_ENERGY") {
-                ofstream coutp("../OUTPUT/OUTPUT_" + phase + "/potential_energy.dat");
+                ofstream coutp("../OUTPUT/OUTPUT_" + phase + "/potential_energy_" + sim_type + ".dat");
                 coutp << "#     BLOCK:  ACTUAL_PE:     PE_AVE:      ERROR:" << endl;
                 coutp.close();
                 _nprop++;
                 _index_penergy = index_property;
                 _measure_penergy = true;
                 index_property++;
-                _vtail = 0.0; // TO BE FIXED IN EXERCISE 7
+                _vtail = ((8.0 * M_PI * _rho) / (9.0 * pow(_r_cut, 9)) - (8.0 * M_PI * _rho) / (3.0 * pow(_r_cut, 3)));
             } else if (property == "KINETIC_ENERGY") {
-                ofstream coutk("../OUTPUT/OUTPUT_" + phase + "/kinetic_energy.dat");
+                ofstream coutk("../OUTPUT/OUTPUT_" + phase + "/kinetic_energy_" + sim_type + ".dat");
                 coutk << "#     BLOCK:   ACTUAL_KE:    KE_AVE:      ERROR:" << endl;
                 coutk.close();
                 _nprop++;
@@ -404,7 +407,7 @@ void System::initialize_properties(string phase) { // Initialize data members us
                 _index_kenergy = index_property;
                 index_property++;
             } else if (property == "TOTAL_ENERGY") {
-                ofstream coutt("../OUTPUT/OUTPUT_" + phase + "/total_energy.dat");
+                ofstream coutt("../OUTPUT/OUTPUT_" + phase + "/total_energy_" + sim_type + ".dat");
                 coutt << "#     BLOCK:   ACTUAL_TE:    TE_AVE:      ERROR:" << endl;
                 coutt.close();
                 _nprop++;
@@ -412,7 +415,7 @@ void System::initialize_properties(string phase) { // Initialize data members us
                 _index_tenergy = index_property;
                 index_property++;
             } else if (property == "TEMPERATURE") {
-                ofstream coutte("../OUTPUT/OUTPUT_" + phase + "/temperature.dat");
+                ofstream coutte("../OUTPUT/OUTPUT_" + phase + "/temperature_" + sim_type + ".dat");
                 coutte << "#     BLOCK:   ACTUAL_T:     T_AVE:       ERROR:" << endl;
                 coutte.close();
                 _nprop++;
@@ -420,17 +423,19 @@ void System::initialize_properties(string phase) { // Initialize data members us
                 _index_temp = index_property;
                 index_property++;
             } else if (property == "PRESSURE") {
-                ofstream coutpr("../OUTPUT/OUTPUT_" + phase + "/pressure.dat");
+                ofstream coutpr("../OUTPUT/OUTPUT_" + phase + "/pressure_" + sim_type + ".dat");
                 coutpr << "#     BLOCK:   ACTUAL_P:     P_AVE:       ERROR:" << endl;
                 coutpr.close();
                 _nprop++;
                 _measure_pressure = true;
                 _index_pressure = index_property;
                 index_property++;
-                _ptail = 0.0; // TO BE FIXED IN EXERCISE 7
+                _ptail = (32. * M_PI * _rho) *
+                         (1. / (9. * pow(_r_cut, 9)) -
+                          1. / (6. * pow(_r_cut, 3)));
             } else if (property == "GOFR") {
-                ofstream coutgr("../OUTPUT/OUTPUT_" + phase + "/gofr_ave.dat");
-                ofstream coutgr2("../OUTPUT/OUTPUT_" + phase + "/gofr_blocks.dat");
+                ofstream coutgr("../OUTPUT/OUTPUT_" + phase + "/gofr_ave_" + sim_type + ".dat");
+                ofstream coutgr2("../OUTPUT/OUTPUT_" + phase + "/gofr_blocks_" + sim_type + ".dat");
                 coutgr << "# DISTANCE:     AVE_GOFR:        ERROR:" << endl;
                 coutgr.close();
                 coutgr2.close();
@@ -466,7 +471,7 @@ void System::initialize_properties(string phase) { // Initialize data members us
                 index_property++;
             } else if (property == "ENDPROPERTIES") {
                 ofstream coutf;
-                coutf.open("../OUTPUT/OUTPUT_" + phase + "/output.dat", ios::app);
+                coutf.open("../OUTPUT/OUTPUT_" + phase + "/output_" + sim_type + ".dat", ios::app);
                 coutf << "Reading properties completed!" << endl;
                 coutf.close();
                 break;
@@ -489,11 +494,11 @@ void System::initialize_properties(string phase) { // Initialize data members us
     return;
 }
 
-void System::finalize(string phase) {
-    this->write_configuration(phase);
+void System::finalize(string phase, string sim_type) {
+    this->write_configuration(phase, sim_type);
     _rnd.SaveSeed();
     ofstream coutf;
-    coutf.open("../OUTPUT/OUTPUT_" + phase + "/output.dat", ios::app);
+    coutf.open("../OUTPUT/OUTPUT_" + phase + "/output_" + sim_type + ".dat", ios::app);
     coutf << "Simulation completed!" << endl;
     coutf.close();
     return;
@@ -504,10 +509,10 @@ bool System::get_restart() {
 }
 
 // Write current configuration as a .xyz file in directory ../OUTPUT/CONFIG/
-void System::write_configuration(string phase) {
+void System::write_configuration(string phase, string sim_type) {
     ofstream coutf;
     if (_sim_type < 2) {
-        coutf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/config.xyz");
+        coutf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/config_" + sim_type + ".xyz");
         if (coutf.is_open()) {
             coutf << _npart << endl;
             coutf << "#Comment!" << endl;
@@ -519,7 +524,7 @@ void System::write_configuration(string phase) {
             }
         } else cerr << "PROBLEM: Unable to open config.xyz" << endl;
         coutf.close();
-        this->write_velocities(phase);
+        this->write_velocities(phase, sim_type);
     } else {
         coutf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/config.spin");
         for (int i = 0; i < _npart; i++) coutf << _particle(i).getspin() << " ";
@@ -529,9 +534,9 @@ void System::write_configuration(string phase) {
 }
 
 // Write configuration nconf as a .xyz file in directory ../OUTPUT/CONFIG/
-void System::write_XYZ(int nconf, string phase) {
+void System::write_XYZ(int nconf, string phase, string sim_type) {
     ofstream coutf;
-    coutf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/config_" + to_string(nconf) + ".xyz");
+    coutf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/config_" + to_string(nconf) + sim_type + ".xyz");
     if (coutf.is_open()) {
         coutf << _npart << endl;
         coutf << "#Comment!" << endl;
@@ -546,9 +551,9 @@ void System::write_XYZ(int nconf, string phase) {
     return;
 }
 
-void System::write_velocities(string phase) {
+void System::write_velocities(string phase, string sim_type) {
     ofstream coutf;
-    coutf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/velocities.out");
+    coutf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/velocities_" + sim_type + ".out");
     if (coutf.is_open()) {
         for (int i = 0; i < _npart; i++) {
             coutf << setw(16) << _particle(i).getvelocity(0)          // vx
@@ -596,9 +601,9 @@ void System::read_configuration() {
     return;
 }
 
-void System::read_configuration(string phase) {
+void System::read_configuration(string phase, string sim_type) {
     ifstream cinf;
-    cinf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/config.xyz");
+    cinf.open("../OUTPUT/CONFIG/CONFIG_" + phase + "/config_" + sim_type + ".xyz");
     if (cinf.is_open()) {
         string comment;
         string particle;
@@ -631,10 +636,10 @@ void System::read_configuration(string phase) {
     return;
 }
 
-void System::block_reset(int blk, string phase) { // Reset block accumulators to zero
+void System::block_reset(int blk, string phase, string sim_type) { // Reset block accumulators to zero
     ofstream coutf;
     if (blk > 0) {
-        coutf.open("../OUTPUT/OUTPUT_" + phase + "/output.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/output_" + sim_type + ".dat", ios::app);
         coutf << "Block completed: " << blk << endl;
         coutf.close();
     }
@@ -668,16 +673,14 @@ void System::measure() { // Measure properties
                 if (dr < _r_cut) {
                     if (_measure_penergy) penergy_temp += 1.0 / pow(dr, 12) - 1.0 / pow(dr, 6); // POTENTIAL ENERGY
                     if (_measure_pressure)
-                        pressure_temp += (48. / _volume * 3.) *
-                                         (1.0 / pow(dr, 12) - 0.5 / pow(dr, 6)); // PRESSURE
+                        pressure_temp += (1.0 / pow(dr, 12) - 0.5 / pow(dr, 6)); // PRESSURE
                 }
             }
         }
     }
     // POTENTIAL ENERGY //////////////////////////////////////////////////////////
     if (_measure_penergy) {
-        _vtail = ((8.0 * M_PI * _rho) / (9.0 * pow(_r_cut, 9)) - (8.0 * M_PI * _rho) / (3.0 * pow(_r_cut, 3))) * _npart;
-        penergy_temp = _vtail + 4.0 * penergy_temp / double(_npart);
+        penergy_temp = _vtail + (4.0 * penergy_temp / double(_npart));
         _measurement(_index_penergy) = penergy_temp;
     }
     // KINETIC ENERGY ////////////////////////////////////////////////////////////
@@ -704,9 +707,8 @@ void System::measure() { // Measure properties
     // TEMPERATURE ///////////////////////////////////////////////////////////////
     if (_measure_temp and _measure_kenergy) _measurement(_index_temp) = (2.0 / 3.0) * kenergy_temp;
     if (_measure_pressure and _measure_kenergy) {
-        double ptail =
-                ((32.0 * M_PI * _rho) / (9.0 * pow(_r_cut, 9)) - (16.0 * M_PI * _rho) / (3.0 * pow(_r_cut, 3)));
-        pressure_temp = ptail + (_rho * (2.0 / 3.0) * kenergy_temp) + (pressure_temp / double(_npart));
+        pressure_temp = _ptail + (_rho * (2.0 / 3.0) * kenergy_temp) +
+                        (16. / (_volume)) * (pressure_temp);
         _measurement(_index_pressure) = pressure_temp;
     }
     _block_av += _measurement; //Update block accumulators
@@ -726,7 +728,7 @@ void System::measure_temp() {
     }
 }
 
-void System::averages(int blk, string phase) {
+void System::averages(int blk, string phase, string sim_type) {
 
     ofstream coutf;
     double average, sum_average, sum_ave2;
@@ -737,7 +739,7 @@ void System::averages(int blk, string phase) {
 
     // POTENTIAL ENERGY //////////////////////////////////////////////////////////
     if (_measure_penergy) {
-        coutf.open("../OUTPUT/OUTPUT_" + phase + "/potential_energy.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/potential_energy_" + sim_type + ".dat", ios::app);
         average = _average(_index_penergy);
         sum_average = _global_av(_index_penergy);
         sum_ave2 = _global_av2(_index_penergy);
@@ -749,7 +751,7 @@ void System::averages(int blk, string phase) {
     }
     // KINETIC ENERGY ////////////////////////////////////////////////////////////
     if (_measure_kenergy) {
-        coutf.open("../OUTPUT/OUTPUT_" + phase + "/kinetic_energy.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/kinetic_energy_" + sim_type + ".dat", ios::app);
         average = _average(_index_kenergy);
         sum_average = _global_av(_index_kenergy);
         sum_ave2 = _global_av2(_index_kenergy);
@@ -761,7 +763,7 @@ void System::averages(int blk, string phase) {
     }
     // TOTAL ENERGY //////////////////////////////////////////////////////////////
     if (_measure_tenergy) {
-        coutf.open("../OUTPUT/OUTPUT_" + phase + "/total_energy.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/total_energy_" + sim_type + ".dat", ios::app);
         average = _average(_index_tenergy);
         sum_average = _global_av(_index_tenergy);
         sum_ave2 = _global_av2(_index_tenergy);
@@ -773,7 +775,7 @@ void System::averages(int blk, string phase) {
     }
     // TEMPERATURE ///////////////////////////////////////////////////////////////
     if (_measure_temp) {
-        coutf.open("../OUTPUT/OUTPUT_" + phase + "/temperature.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/temperature_" + sim_type + ".dat", ios::app);
         average = _average(_index_temp);
         sum_average = _global_av(_index_temp);
         sum_ave2 = _global_av2(_index_temp);
@@ -785,7 +787,7 @@ void System::averages(int blk, string phase) {
     }
     // PRESSURE //////////////////////////////////////////////////////////////////
     if (_measure_pressure) {
-        coutf.open("../OUTPUT/OUTPUT_" + phase + "/pressure.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/pressure_" + sim_type + ".dat", ios::app);
         average = _average(_index_pressure);
         sum_average = _global_av(_index_pressure);
         sum_ave2 = _global_av2(_index_pressure);
@@ -797,7 +799,7 @@ void System::averages(int blk, string phase) {
     }
     // GOFR //////////////////////////////////////////////////////////////////////
     if (_measure_gofr) {
-        coutf.open("../OUTPUT/OUTPUT_" + phase + "/gofr_blocks.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/gofr_blocks_" + sim_type + ".dat", ios::app);
         for (int i = _index_gofr; i < _nprop; i++) {
             double r = (i - _index_gofr) * _bin_size;
             double norm = 1. / ((4. / 3.) * M_PI * (pow((r + _bin_size), 3) - pow(r, 3)) * _rho * _npart);
@@ -806,7 +808,7 @@ void System::averages(int blk, string phase) {
         }
         coutf << endl;
         coutf.close();
-        coutf.open("../OUTPUT/OUTPUT_" + phase + "/gofr_ave.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + phase + "/gofr_ave_" + sim_type + ".dat", ios::app);
         for (int i = _index_gofr; i < _nprop; i++) {
             double r = (i - _index_gofr) * _bin_size;
             double norm = 1. / ((4. / 3.) * M_PI * (pow((r + _bin_size), 3) - pow(r, 3)) * _rho * _npart);
@@ -822,7 +824,7 @@ void System::averages(int blk, string phase) {
     }
     // ACCEPTANCE ////////////////////////////////////////////////////////////////
     double fraction;
-    coutf.open("../OUTPUT/acceptance.dat", ios::app);
+    coutf.open("../OUTPUT/OUTPUT_" + phase + "/acceptance_" + sim_type + ".dat", ios::app);
     if (_nattempts > 0) fraction = double(_naccepted) / double(_nattempts);
     else fraction = 0.0;
     coutf << setw(12) << blk << setw(12) << fraction << endl;

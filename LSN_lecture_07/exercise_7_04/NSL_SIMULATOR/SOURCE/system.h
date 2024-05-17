@@ -65,22 +65,22 @@ private:
 public: // Function declarations
   int get_nbl();              // Get the number of blocks
   int get_nsteps();           // Get the number of steps in each block
-  void initialize(string phase); // Initialize system properties
-  void initialize_properties(string phase);// Initialize properties for measurement
-  void finalize(string phase);            // Finalize system and clean up
-  void write_configuration(string phase); // Write final system configuration to XYZ file
-  void write_XYZ(int nconf, string phase);  // Write system configuration in XYZ format on the fly
-  void write_velocities(string phase);    // Write final particle velocities to file
+  void initialize(string phase, string sim_type); // Initialize system properties
+  void initialize_properties(string phase, string sim_type);// Initialize properties for measurement
+  void finalize(string phase, string sim_type);            // Finalize system and clean up
+  void write_configuration(string phase, string sim_type); // Write final system configuration to XYZ file
+  void write_XYZ(int nconf, string phase, string sim_type);  // Write system configuration in XYZ format on the fly
+  void write_velocities(string phase, string sim_type);    // Write final particle velocities to file
   void read_configuration();  // Read system configuration from file
-  void read_configuration(string phase);  // Read system configuration from file
+  void read_configuration(string phase, string sim_type);  // Read system configuration from file
   void initialize_velocities();// Initialize particle velocities
-  void initialize_velocities(string phase);// Initialize particle velocities
+  void initialize_velocities(string phase, string sim_type);// Initialize particle velocities
   void step(string phase);                // Perform a simulation step
   void step_restart(string phase);                // Perform a simulation step
-  void block_reset(int blk, string phase);  // Reset block averages
+  void block_reset(int blk, string phase, string sim_type);  // Reset block averages
   void measure();             // Measure properties of the system
   void measure_temp();
-  void averages(int blk, string phase);     // Compute averages of properties
+  void averages(int blk, string phase, string sim_type);     // Compute averages of properties
   double error(double acc, double acc2, int blk); // Compute error
   void move(int part, string phase);        // Move a particle
   bool metro(int part, string phase);       // Perform Metropolis acceptance-rejection step

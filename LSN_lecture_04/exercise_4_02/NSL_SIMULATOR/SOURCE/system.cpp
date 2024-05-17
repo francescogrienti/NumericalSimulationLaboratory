@@ -663,9 +663,7 @@ void System::measure() { // Measure properties
                 // GOFR ... TO BE FIXED IN EXERCISE 7
                 if (dr < _r_cut) {
                     if (_measure_penergy) penergy_temp += 1.0 / pow(dr, 12) - 1.0 / pow(dr, 6); // POTENTIAL ENERGY
-                    if (_measure_pressure)
-                        pressure_temp += (48. / _volume * 3.) *
-                                         (1.0 / pow(dr, 12) - 0.5 / pow(dr, 6)); // PRESSURE
+                    if (_measure_pressure) pressure_temp += 1.0 / pow(dr, 12) - 0.5 / pow(dr, 6); // PRESSURE
                 }
             }
         }
@@ -701,7 +699,8 @@ void System::measure() { // Measure properties
         _measurement(_index_temp) = (2.0 / 3.0) * kenergy_temp;
     }
     if (_measure_pressure and _measure_kenergy) {
-        pressure_temp = (_rho * (2.0 / 3.0) * kenergy_temp) + (pressure_temp / double(_npart));
+        pressure_temp =  (_rho * (2.0 / 3.0) * kenergy_temp) +
+                         (16. / (_volume)) * (pressure_temp);
         _measurement(_index_pressure) = pressure_temp;
     }
 // TO BE FIXED IN EXERCISE 4

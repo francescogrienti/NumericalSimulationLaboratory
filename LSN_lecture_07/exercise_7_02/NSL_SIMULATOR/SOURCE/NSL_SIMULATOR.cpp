@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
     // Convert the argument to an integer
     string phase = argv[1];
 
+    //AGGIUNGERE DEGLI STEP PER EQUILIBRARE!!!!!
     bool breaking = false;
     int nconf = 1;
     System SYS;

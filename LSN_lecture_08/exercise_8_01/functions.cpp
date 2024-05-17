@@ -83,7 +83,7 @@ Metropolis_Uniform(double x, Random rnd, double metropolis_step,
                 if (r <= acceptance) {
                     x = x_k;
                 }
-                integral_sum += (potential(x) + kinetic_energy(x, mu, sigma));
+                integral_sum += kinetic_energy(x, mu, sigma) + potential(x);
                 WriteResults << acceptance << " " << x << " " << "\t" << endl;
             }
             ave[i] = integral_sum / (steps / blocks);
@@ -95,11 +95,10 @@ Metropolis_Uniform(double x, Random rnd, double metropolis_step,
 }
 
 double pdf_function(double x, double mu, double sigma) {
-    double N = 2 * sigma * sqrt(M_PI) * (1. + exp((-1) * (pow(mu, 2)) / (pow(sigma, 2))));
     double psi_trial_2 = pow(
             exp((-1.) * (pow(x - mu, 2) / (2 * pow(sigma, 2)))) + exp((-1.) * (pow(x + mu, 2) / (2 * pow(sigma, 2)))),
             2);
-    return psi_trial_2 / N;
+    return psi_trial_2;
 }
 
 void cumulativeAverage(vector<double> average, vector<double> average2, string filename) {

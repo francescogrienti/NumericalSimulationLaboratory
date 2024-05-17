@@ -19,12 +19,12 @@ int main(int argc, char *argv[]) {
 
     Random rnd;
     int M = 10000; //Throws
-    int N = 200; //Blocks
+    int N = 100; //Blocks
     double x = 1.; //Starting point
     tuple<vector<double>, vector<double>> hamiltonian_GS;
-    double metropolis_step = 2.1;
-    double mu = 1.1;
-    double sigma = 1.;
+    double metropolis_step = 0.8;
+    double mu = 0.75;
+    double sigma = 0.7;
     vector<int> seed(4, 0);
     int p1 = 0;
     int p2 = 0;
