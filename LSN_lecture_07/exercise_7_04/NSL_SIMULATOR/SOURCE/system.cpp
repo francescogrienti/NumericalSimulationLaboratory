@@ -707,7 +707,7 @@ void System::measure() { // Measure properties
     // TEMPERATURE ///////////////////////////////////////////////////////////////
     if (_measure_temp and _measure_kenergy) _measurement(_index_temp) = (2.0 / 3.0) * kenergy_temp;
     if (_measure_pressure and _measure_kenergy) {
-        pressure_temp = _ptail + (_rho * (2.0 / 3.0) * kenergy_temp) +
+        pressure_temp = _ptail * (_npart/_volume) + (_rho * (2.0 / 3.0) * kenergy_temp) + //Correzione al viriale, media è sulle config non sulle particelle!!!
                         (16. / (_volume)) * (pressure_temp);
         _measurement(_index_pressure) = pressure_temp;
     }

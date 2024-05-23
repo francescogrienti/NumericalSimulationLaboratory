@@ -24,7 +24,7 @@ double pdf_function(double, double mu, double sigma);
 
 //Metropolis algorithm with Uniform extraction
 std::tuple<std::vector<double>, std::vector<double>>
-Metropolis_Uniform(double x, Random rnd, double metropolis_step,
+Metropolis_Uniform(double x, Random &rnd, double metropolis_step,
                    double (*pdf_function)(double x, double mu, double sigma),
                    double (*potential)(double x),
                    double (*kinetic_energy)(double x, double mu, double sigma), double mu, double sigma, int blocks,
@@ -32,7 +32,7 @@ Metropolis_Uniform(double x, Random rnd, double metropolis_step,
                    std::string filename);
 
 //Cumulative average and error
-void cumulativeAverage(std::vector<double> average, std::vector<double> average2, std::string filename);
+std::tuple<std::vector<double>, std::vector<double>> cumulativeAverage(std::vector<double> average, std::vector<double> average2, std::string filename);
 
 //Error
 double error(std::vector<double> av, std::vector<double> av2, int n);

@@ -57,7 +57,7 @@ double kinetic_energy(double x, double mu, double sigma) {
 }
 
 std::tuple<std::vector<double>, std::vector<double>>
-Metropolis_Uniform(double x, Random rnd, double metropolis_step,
+Metropolis_Uniform(double x, Random &rnd, double metropolis_step,
                    double (*pdf_function)(double x, double mu, double sigma),
                    double (*potential)(double x),
                    double (*kinetic_energy)(double x, double mu, double sigma), double mu, double sigma, int blocks,
@@ -70,9 +70,9 @@ Metropolis_Uniform(double x, Random rnd, double metropolis_step,
     vector<double> ave2(blocks, 0.);
     double r = 0.;
     double x_k = 0.;
-    ofstream WriteResults;
-    WriteResults.open(filename);
-    if (WriteResults.is_open()) {
+    //ofstream WriteResults;
+    //WriteResults.open(filename);
+    //if (WriteResults.is_open()) {
         for (int i = 0; i < blocks; i++) {
             integral_sum = 0.;
             for (int j = 0; j < (steps / blocks); j++) {
@@ -84,13 +84,13 @@ Metropolis_Uniform(double x, Random rnd, double metropolis_step,
                     x = x_k;
                 }
                 integral_sum += (potential(x) + kinetic_energy(x, mu, sigma));
-                WriteResults << acceptance << " " << x << " " << "\t" << endl;
+                //WriteResults << acceptance << " " << x << " " << "\t" << endl;
             }
             ave[i] = integral_sum / (steps / blocks);
             ave2[i] = double(pow(ave[i], 2));
         }
-    } else cerr << "PROBLEM: Unable to open random.out" << endl;
-    WriteResults.close();
+    //} else cerr << "PROBLEM: Unable to open random.out" << endl;
+    //WriteResults.close();
     return make_tuple(ave, ave2);
 }
 
@@ -102,7 +102,7 @@ double pdf_function(double x, double mu, double sigma) {
     return psi_trial_2 / N;
 }
 
-void cumulativeAverage(vector<double> average, vector<double> average2, string filename) {
+std::tuple<std::vector<double>, std::vector<double>> cumulativeAverage(vector<double> average, vector<double> average2, string filename) {
     vector<double> sumProg((int) (average.size()), 0.);
     vector<double> sum2Prog((int) (average.size()), 0.);
     vector<double> errProg((int) (average.size()), 0.);
@@ -118,6 +118,7 @@ void cumulativeAverage(vector<double> average, vector<double> average2, string f
         errProg[k] = error(sumProg, sum2Prog, k); //Statistical uncertainty
     }
 
+    /*
     ofstream WriteResults;
     WriteResults.open(filename);
     if (WriteResults.is_open()) {
@@ -126,6 +127,9 @@ void cumulativeAverage(vector<double> average, vector<double> average2, string f
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults.close();
+    */
+
+    return make_tuple(sumProg, errProg);
 }
 
 double error(vector<double> av, vector<double> av2, int n) {
