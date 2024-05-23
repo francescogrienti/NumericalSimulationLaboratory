@@ -18,22 +18,19 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
     Random rnd;
-    int M = 1000000; //Throws
+    int SA_steps = 10000; //Throws
     int N = 200; //Blocks
     double x = 1.1; //Starting point
-    tuple<vector<double>, vector<double>> metro;
-    tuple<vector<double>, vector<double>> hamiltonian_GS;
+    double x_new = 0.;
+    const int n_iter = 5;
     double metropolis_step = 2.9;
     double mu = 1.;
-    double sigma = 1.;
-    double T_start = 4.;
-    double T = 0.;
-    double SA_steps = 350;
-    double SA_mu_interval = 0.09;
-    double SA_sigma_interval = 0.09;
-    double T_decrem = 0.01;
-    double acceptance = 0.;
-    double r = 0.;
+    double sigma = 0.;
+    double T_start = 0.1;
+    double delta_mu = 0.1;
+    double delta_sigma = 0.1;
+    double delta_T = 0.0005;
+    double x_delta = 2.5;
     double mu_new = 0.;
     double sigma_new = 0.;
     vector<int> seed(4, 0);
@@ -46,33 +43,41 @@ int main(int argc, char *argv[]) {
     WriteResults.open("results_H_vs_SA_steps.dat");
     ofstream WriteResults1;
     WriteResults1.open("results_param_vs_SA_steps.dat");
-    for (int k = 0; k < SA_steps; k++) {
-        metro = Metropolis_Uniform(x, rnd, metropolis_step, pdf_function, potential, kinetic_energy, mu, sigma,
-                                   N,
-                                   M, "results_x_hamiltonian_GS.dat");
-        hamiltonian_GS = cumulativeAverage(get<0>(metro), get<1>(metro), "results_energy_GS.dat");
-        if (WriteResults.is_open()) {
-            WriteResults << (get<0>(hamiltonian_GS)[N - 1]) << " " << (get<1>(hamiltonian_GS)[N - 1]) << " " << "\t"
-                         << endl;
-        }
-        if (WriteResults1.is_open()) {
-            WriteResults1 << mu << " " << sigma << " " << "\t" << endl;
-        }
-        T = T_start - 1. * T_decrem;
-        mu_new = rnd.Rannyu(mu - SA_mu_interval, x + SA_mu_interval);
-        sigma_new = rnd.Rannyu(sigma - SA_sigma_interval, sigma + SA_sigma_interval);
-        acceptance = min(1., exp((-1. / T) * ((potential(x) + kinetic_energy(x, mu_new, sigma_new)))) /
-                             exp((-1. / T_start) * (get<0>(hamiltonian_GS)[N - 1])));
-        r = rnd.Rannyu();
-        if (r <= acceptance) {
-            mu = mu_new;
-            sigma = sigma_new;
-        }
-        cout << T << endl;
-        T_start = T;
 
+    for (double T = T_start; T >= delta_T; T -= delta_T) {
+        tuple<vector<double>, vector<double>> metropolis_old;
+        tuple<vector<double>, vector<double>> metropolis_new;
+        tuple<vector<double>, vector<double>> H_old;
+        tuple<vector<double>, vector<double>> H_new;
+        double beta = 1. / T;
+        metropolis_step = rnd.Rannyu(metropolis_step - 1., metropolis_step + 1.);
+        for (int i = 0; i < n_iter; i++) {
+            metropolis_old = Metropolis_Uniform(x, rnd, metropolis_step, pdf_function, potential, kinetic_energy,
+                                                mu, sigma,
+                                                N,
+                                                SA_steps, "results_x_hamiltonian_GS.dat");
+            H_old = cumulativeAverage(get<0>(metropolis_old), get<1>(metropolis_old), "results_energy_GS.dat");
+            x_new = rnd.Rannyu(x - x_delta, x + x_delta);
+            mu_new = fabs(mu + delta_mu * (rnd.Rannyu() - 0.5));
+            sigma_new = fabs(sigma + delta_sigma * (rnd.Rannyu() - 0.5));
+            metropolis_new = Metropolis_Uniform(x_new, rnd, metropolis_step, pdf_function, potential, kinetic_energy,
+                                                mu_new, sigma_new,
+                                                N,
+                                                SA_steps, "results_x_hamiltonian_GS.dat");
+            H_new = cumulativeAverage(get<0>(metropolis_new), get<1>(metropolis_new), "results_energy_GS.dat");
+            double p = 1.0;
+            if (get<0>(H_new)[N - 1] > get<0>(H_old)[N - 1])
+                p = exp(-beta * (get<0>(H_new)[N - 1] - get<0>(H_old)[N - 1]));
+            if (p >= rnd.Rannyu()) {
+                mu = mu_new;
+                sigma = sigma_new;
+                get<0>(H_old) = get<0>(H_new);
+            }
+        }
+        if (WriteResults.is_open()) {
+            WriteResults << get<0>(H_old)[N - 1] << " " << get<1>(H_old)[N - 1] << " " << "\t" << endl;
+        } else cerr << "PROBLEM: Unable to open random.out" << endl;
     }
-    cout << mu << " " << sigma << endl;
     rnd.SaveSeed();
 
 
