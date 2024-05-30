@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <vector>
+#include <tuple>
 #include <fstream>
 #include <cmath>
 #include "functions.h"
@@ -71,6 +72,17 @@ void cumulativeAverage(vector<double> average, vector<double> average2, string f
     WriteResults.close();
 }
 
+bool check_function(std::vector<int> &labels) {
+    std::unordered_map<int, bool> dict;
+    for (int i = 1; i < labels.size() - 1; i++) {
+        if (dict.find(i) != dict.end()) {
+            return false;
+        }
+        dict[i] = true;
+    }
+    return true;
+}
+
 double error(vector<double> av, vector<double> av2, int n) {
     if (n == 0) {
         return 0;
@@ -78,6 +90,8 @@ double error(vector<double> av, vector<double> av2, int n) {
         return sqrt(av2[n] - pow(av[n], 2)) / (sqrt(n));
     }
 }
+
+
 
 
 

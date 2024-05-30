@@ -8,6 +8,7 @@
 #include <armadillo>
 #include "City.h"
 #include "functions.h"
+#include <vector>
 
 using namespace std;
 using namespace arma;
@@ -23,6 +24,8 @@ public:
     // Destructor
     ~Path();
 
+    void initialize(const int n_cities);
+
     //Method for getting the city in the path
     City getCity(int i);
 
@@ -34,6 +37,9 @@ public:
 
     //Method for setting the vector of cities in the path
     void setCity(int label, double coordinate, int i);
+
+    //Method for getting the vector of labels
+    std::vector<int> getLabels();
 
 };
 

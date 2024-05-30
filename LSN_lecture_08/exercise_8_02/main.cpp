@@ -19,18 +19,17 @@ int main(int argc, char *argv[]) {
 
     Random rnd;
     int SA_steps = 10000; //Throws
-    int N = 200; //Blocks
-    double x = 1.1; //Starting point
+    int N = 100; //Blocks
+    double x = 1.; //Starting point
     double x_new = 0.;
-    const int n_iter = 5;
+    const int n_iter = 10;
     double metropolis_step = 2.9;
     double mu = 1.;
-    double sigma = 0.;
+    double sigma = 1.;
     double T_start = 0.1;
     double delta_mu = 0.1;
     double delta_sigma = 0.1;
     double delta_T = 0.0005;
-    double x_delta = 2.5;
     double mu_new = 0.;
     double sigma_new = 0.;
     vector<int> seed(4, 0);
@@ -50,17 +49,15 @@ int main(int argc, char *argv[]) {
         tuple<vector<double>, vector<double>> H_old;
         tuple<vector<double>, vector<double>> H_new;
         double beta = 1. / T;
-        metropolis_step = rnd.Rannyu(metropolis_step - 1., metropolis_step + 1.);
         for (int i = 0; i < n_iter; i++) {
             metropolis_old = Metropolis_Uniform(x, rnd, metropolis_step, pdf_function, potential, kinetic_energy,
                                                 mu, sigma,
                                                 N,
                                                 SA_steps, "results_x_hamiltonian_GS.dat");
             H_old = cumulativeAverage(get<0>(metropolis_old), get<1>(metropolis_old), "results_energy_GS.dat");
-            x_new = rnd.Rannyu(x - x_delta, x + x_delta);
             mu_new = fabs(mu + delta_mu * (rnd.Rannyu() - 0.5));
             sigma_new = fabs(sigma + delta_sigma * (rnd.Rannyu() - 0.5));
-            metropolis_new = Metropolis_Uniform(x_new, rnd, metropolis_step, pdf_function, potential, kinetic_energy,
+            metropolis_new = Metropolis_Uniform(x, rnd, metropolis_step, pdf_function, potential, kinetic_energy,
                                                 mu_new, sigma_new,
                                                 N,
                                                 SA_steps, "results_x_hamiltonian_GS.dat");
@@ -71,7 +68,6 @@ int main(int argc, char *argv[]) {
             if (p >= rnd.Rannyu()) {
                 mu = mu_new;
                 sigma = sigma_new;
-                get<0>(H_old) = get<0>(H_new);
             }
         }
         if (WriteResults.is_open()) {
