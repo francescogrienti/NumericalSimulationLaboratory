@@ -24,6 +24,9 @@ double L1_norm(City city_1, City city_2, double r);
 //Function checking that the individual fulfils the bonds
 bool check_function(std::vector<int>& labels);
 
+//Selection operator
+//Path selection_operator(field<Path> population);
+
 //Cumulative average and error
 void cumulativeAverage(std::vector<double> average, std::vector<double> average2, std::string filename);
 

@@ -72,6 +72,7 @@ void cumulativeAverage(vector<double> average, vector<double> average2, string f
     WriteResults.close();
 }
 
+//Check function
 bool check_function(std::vector<int> &labels) {
     std::unordered_map<int, bool> dict;
     for (int i = 1; i < labels.size() - 1; i++) {
@@ -82,6 +83,9 @@ bool check_function(std::vector<int> &labels) {
     }
     return true;
 }
+
+//Selection operator
+//Path selection_operator(field<Path> population)
 
 double error(vector<double> av, vector<double> av2, int n) {
     if (n == 0) {
