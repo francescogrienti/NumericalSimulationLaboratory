@@ -45,7 +45,24 @@ void Genetics::setPopSize(int n) {
     return;
 }
 
-void Genetics::initialize_path(Random &rnd) {
+//Initialize the map -- square
+void Genetics::initialize_path_square(Random &rnd) {
+    vector<double> coordinates(n_cities, 0.);
+    vector<int> labels(n_cities, 0);
+    for (int k = 0; k < n_cities; k++) {
+        labels[k] = k + 1;
+        coordinates[k] = rnd.Rannyu(0., 2 * M_PI);
+    }
+    path.initialize_path(n_cities);
+    for (int k = 0; k < n_cities; k++) {
+        path.setCity(labels[k], coordinates[k], k);
+    }
+
+    return;
+}
+
+//Initialize the map -- circle
+void Genetics::initialize_path_circle(Random &rnd) {
     vector<double> coordinates(n_cities, 0.);
     vector<int> labels(n_cities, 0);
     for (int k = 0; k < n_cities; k++) {
@@ -93,7 +110,8 @@ bool Genetics::check_function(std::vector<int> &labels) {
     }
     return true;
 }
-void Genetics::sort_paths(std::vector<vector<int>>& population) {
+
+void Genetics::sort_paths(std::vector<vector<int>> &population) {
     const double r = 1.0;
     vector<double> path_length(population.size(), 0.0);
 
@@ -117,7 +135,7 @@ void Genetics::sort_paths(std::vector<vector<int>>& population) {
         vecWithVals[i].value = path_length[i];
     }
 
-    auto compare = [](const VecWithVal& a, const VecWithVal& b) {
+    auto compare = [](const VecWithVal &a, const VecWithVal &b) {
         return a.value < b.value;
     };
 
@@ -152,7 +170,7 @@ void Genetics::shift_operator(double prob, vector<int> &labels, int N_elem, int 
     if (prob < probabilities[0]) {
         vector<int> labels_elem(N_elem, 0);
         vector<int> last_labels(shift, 0);
-        int n_1 = (rand() % (20 - 5 + 1)) + 5;
+        int n_1 = (rand() % (20 - 5 + 1)) + 2;
         for (int i = 0; i < N_elem; i++) {
             labels_elem[i] = labels[n_1 + i];
         }
@@ -197,7 +215,7 @@ void Genetics::m_permutation(double prob, vector<int> &labels, int n) {
 void Genetics::inverse_operator(double prob, vector<int> &labels, int n) {
     if (prob < probabilities[3]) {
         int len = labels.size();
-        int start = (rand() % (20 - 5+ 1)) + 5;
+        int start = (rand() % (20 - 5 + 1)) + 5;
 
         if (len < start + n) {
             std::cerr << "Array too small to contain a subarray of length " << n << " starting at index " << start

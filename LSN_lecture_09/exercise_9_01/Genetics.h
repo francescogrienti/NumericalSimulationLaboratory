@@ -41,8 +41,11 @@ public:
     //Set number of individuals in the population
     void setPopSize(int n);
 
-    //Initialize the map
-    void initialize_path(Random &rnd);
+    //Initialize the map -- circle
+    void initialize_path_circle(Random &rnd);
+
+    //Initialize the map -- square
+    void initialize_path_square(Random &rnd);
 
     //Creation of the first population
     vector<vector<int>> first_pop(Random &rnd);

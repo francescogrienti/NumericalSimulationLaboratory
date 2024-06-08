@@ -47,10 +47,11 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
     Random rnd;
-    Genetics genetics;
-    int pop_size = 100;
+    Genetics genetics_circle;
+    Genetics genetics_square;
+    int pop_size = 30;
     int n_cities = 34;
-    int n_generations = 500000;
+    int n_generations = 100;
 
     vector<int> best_path(n_cities + 1, 0);
     int j = 0;
@@ -63,18 +64,23 @@ int main(int argc, char *argv[]) {
     pair<vector<int>, int> mother_pair;
     pair<vector<int>, vector<int>> sons;
     vector<double> probabilities = {0.1, 0.1, 0.1, 0.1, 0.6};
-    vector<vector<int>> first_pop(pop_size, vector<int>(n_cities + 1, 0));
+    vector<vector<int>> first_pop_circle(pop_size, vector<int>(n_cities + 1, 0));
+    vector<vector<int>> first_pop_square(pop_size, vector<int>(n_cities + 1, 0));
     double r = 1.;
     vector<int> seed(4, 0);
     int p1 = 0;
     int p2 = 0;
 
     rnd = initialize(rnd, seed, p1, p2, "Primes", "seed.in");
-    genetics.setPopSize(pop_size);
-    genetics.setCitiesPath(n_cities);
-    genetics.setProbabilities(probabilities);
-    genetics.initialize_path(rnd);
-    first_pop = genetics.first_pop(rnd);
+
+    //CIRCLE
+    genetics_circle.setPopSize(pop_size);
+    genetics_circle.setCitiesPath(n_cities);
+    genetics_circle.setProbabilities(probabilities);
+    genetics_circle.initialize_path_circle(rnd);
+    first_pop_circle = genetics_circle.first_pop(rnd);
+
+
 
     ofstream WriteResults;
     WriteResults.open("average_circle.dat");
@@ -90,43 +96,127 @@ int main(int argc, char *argv[]) {
         mother_pair.second = j_mother;
         sons.first = father;
         sons.second = mother;
-        genetics.sort_paths(first_pop);
-        best = genetics.selection_operator(first_pop, rnd, 3);
-        genetics.pair_permutation(rnd.Rannyu(), best.first);
-        genetics.shift_operator(rnd.Rannyu(), best.first, (rand() % (3 - 1 + 1)) + 1, (rand() % (2 - 1 + 1)) + 1);
-        genetics.m_permutation(rnd.Rannyu(), best.first, (rand() % (5 - 1 + 1)) + 1);
-        genetics.inverse_operator(rnd.Rannyu(), best.first, (rand() % (5 - 1 + 1)) + 1);
-        genetics.check_function(best.first);
-        first_pop[pop_size - 1] = best.first;
-        genetics.sort_paths(first_pop);
-        if (rnd.Rannyu() < genetics.getProbabilities()[4]) {
-            father_pair = genetics.selection_operator(first_pop, rnd, 3);
-            mother_pair = genetics.selection_operator(first_pop, rnd, 3);
-            sons = genetics.cross_over_operator(father_pair.first, mother_pair.first);
-            genetics.check_function(sons.first);
-            genetics.check_function(sons.second);
-            first_pop[pop_size - 1] = sons.first;
-            first_pop[pop_size - 2] = sons.second;
+        genetics_circle.sort_paths(first_pop_circle);
+        best = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
+        genetics_circle.pair_permutation(rnd.Rannyu(), best.first);
+        genetics_circle.check_function(best.first);
+        first_pop_circle[pop_size - 1] = best.first;
+        genetics_circle.sort_paths(first_pop_circle);
+        best = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
+        genetics_circle.shift_operator(rnd.Rannyu(), best.first, (rand() % (3 - 1 + 1)) + 1,
+                                       (rand() % (2 - 1 + 1)) + 1);
+        genetics_circle.check_function(best.first);
+        first_pop_circle[pop_size - 1] = best.first;
+        genetics_circle.sort_paths(first_pop_circle);
+        best = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
+        genetics_circle.m_permutation(rnd.Rannyu(), best.first, (rand() % (5 - 1 + 1)) + 1);
+        genetics_circle.check_function(best.first);
+        first_pop_circle[pop_size - 1] = best.first;
+        genetics_circle.sort_paths(first_pop_circle);
+        best = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
+        genetics_circle.inverse_operator(rnd.Rannyu(), best.first, (rand() % (5 - 1 + 1)) + 1);
+        genetics_circle.check_function(best.first);
+        first_pop_circle[pop_size - 1] = best.first;
+        genetics_circle.sort_paths(first_pop_circle);
+        if (rnd.Rannyu() < genetics_circle.getProbabilities()[4]) {
+            father_pair = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
+            mother_pair = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
+            sons = genetics_circle.cross_over_operator(father_pair.first, mother_pair.first);
+            genetics_circle.check_function(sons.first);
+            genetics_circle.check_function(sons.second);
+            first_pop_circle[pop_size - 1] = sons.first;
+            first_pop_circle[pop_size - 2] = sons.second;
         }
-        genetics.sort_paths(first_pop);
+        genetics_circle.sort_paths(first_pop_circle);
 
-        /*
         if (WriteResults.is_open()) {
-            WriteResults << i << " " << genetics.compute_best_path(first_pop[0], r) << " "
-                         << genetics.compute_half_best_path(first_pop, r) << " " << "\t" << endl;
+            WriteResults << i << " " << genetics_circle.compute_best_path(first_pop_circle[0], r) << " "
+                         << genetics_circle.compute_half_best_path(first_pop_circle, r) << " " << "\t" << endl;
         } else cerr << "PROBLEM: Unable to open random.out" << endl;
-        */
+
     }
+
+
+    for (int i = 0; i < pop_size; i++) {
+        for (int k = 0; k < n_cities; k++) {
+            cout << first_pop_circle[i][k] << " ";
+        }
+        cout << endl;
+    }
+
+
+    cout << endl;
 
     //Printing the coordinates of the best path in (x,y) cartesian coordinates
     for (int k = 0; k <= n_cities - 1; k++) {
         if (WriteResults1.is_open()) {
-            WriteResults1 << r * cos(genetics.getCityCoordinate(first_pop[0][k])) << " "
-                          << r * sin(genetics.getCityCoordinate(first_pop[0][k])) << " " << "\t" << endl;
+            WriteResults1 << r * cos(genetics_circle.getCityCoordinate(first_pop_circle[0][k])) << " "
+                          << r * sin(genetics_circle.getCityCoordinate(first_pop_circle[0][k])) << " " << "\t" << endl;
         } else cerr << "PROBLEM: Unable to open random.out" << endl;
     }
 
 
+    /*
+    //SQUARE
+    genetics_square.setPopSize(pop_size);
+    genetics_square.setCitiesPath(n_cities);
+    genetics_square.setProbabilities(probabilities);
+    genetics_square.initialize_path_square(rnd);
+    first_pop_square = genetics_square.first_pop(rnd);
+
+    ofstream WriteResults2;
+    WriteResults2.open("average_square.dat");
+    ofstream WriteResults3;
+    WriteResults3.open("best_path_square_coordinates.dat");
+
+
+    for (int i = 0; i < n_generations; i++) {
+        best.first = best_path;
+        best.second = j;
+        father_pair.first = father;
+        father_pair.second = j_father;
+        mother_pair.first = mother;
+        mother_pair.second = j_mother;
+        sons.first = father;
+        sons.second = mother;
+        genetics_square.sort_paths(first_pop_square);
+        best = genetics_square.selection_operator(first_pop_square, rnd, 3);
+        genetics_square.pair_permutation(rnd.Rannyu(), best.first);
+        genetics_square.shift_operator(rnd.Rannyu(), best.first, (rand() % (3 - 1 + 1)) + 1,
+                                       (rand() % (2 - 1 + 1)) + 1);
+        genetics_square.m_permutation(rnd.Rannyu(), best.first, (rand() % (5 - 1 + 1)) + 1);
+        genetics_square.inverse_operator(rnd.Rannyu(), best.first, (rand() % (5 - 1 + 1)) + 1);
+        genetics_square.check_function(best.first);
+        first_pop_square[pop_size - 1] = best.first;
+        genetics_square.sort_paths(first_pop_square);
+        if (rnd.Rannyu() < genetics_square.getProbabilities()[4]) {
+            father_pair = genetics_square.selection_operator(first_pop_square, rnd, 3);
+            mother_pair = genetics_square.selection_operator(first_pop_square, rnd, 3);
+            sons = genetics_square.cross_over_operator(father_pair.first, mother_pair.first);
+            genetics_square.check_function(sons.first);
+            genetics_square.check_function(sons.second);
+            first_pop_square[pop_size - 1] = sons.first;
+            first_pop_square[pop_size - 2] = sons.second;
+        }
+        genetics_square.sort_paths(first_pop_square);
+
+
+        if (WriteResults2.is_open()) {
+            WriteResults2 << i << " " << genetics_square.compute_best_path(first_pop_circle[0], r) << " "
+                         << genetics_circle.compute_half_best_path(first_pop_circle, r) << " " << "\t" << endl;
+        } else cerr << "PROBLEM: Unable to open random.out" << endl;
+
+    }
+
+    //Printing the coordinates of the best path in (x,y) cartesian coordinates
+    for (int k = 0; k <= n_cities - 1; k++) {
+        if (WriteResults3.is_open()) {
+            WriteResults3 << << " "
+                          << << " " << "\t" << endl;
+        } else cerr << "PROBLEM: Unable to open random.out" << endl;
+    }
+
+    */
     rnd.SaveSeed();
 
 
