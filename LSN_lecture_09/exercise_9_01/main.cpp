@@ -8,135 +8,125 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 *****************************************************************
 *****************************************************************/
 
-#include "random.h"
-#include "functions.h"
-#include <vector>
+#include "Genetics.h"
+#include <fstream>
+#include <iostream>
 #include "Path.h"
+#include "random.h"
+#include <vector>
 #include <algorithm>
+#include <cmath>
+
+//RANDOM NUMBER GENERATOR INITIALIZATION
+
+Random initialize(Random rnd, vector<int> seed, int p1, int p2, std::string prime_file, std::string input_file) {
+    ifstream Primes(prime_file);
+    if (Primes.is_open()) {
+        Primes >> p1 >> p2;
+    } else cerr << "PROBLEM: Unable to open Primes" << endl;
+    Primes.close();
+
+    ifstream input(input_file);
+    string property;
+    if (input.is_open()) {
+        while (!input.eof()) {
+            input >> property;
+            if (property == "RANDOMSEED") {
+                input >> seed[0] >> seed[1] >> seed[2] >> seed[3];
+                rnd.SetRandom(seed, p1, p2);
+            }
+        }
+        input.close();
+    } else cerr << "PROBLEM: Unable to open seed.in" << endl;
+
+    return rnd;
+}
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
 
     Random rnd;
-    field<Path> population;
-    const int pop_size = 100;
-    const int n_cities = 34;
-    vector<double> coordinates(n_cities, 0.);
-    vector<int> labels(n_cities + 1, 0);
+    Genetics genetics;
+    int pop_size = 100;
+    int n_cities = 34;
+    int n_generations = 500000;
+
+    vector<int> best_path(n_cities + 1, 0);
+    int j = 0;
+    pair<vector<int>, int> best;
+    vector<int> father(n_cities + 1, 0);
+    int j_father = 0;
+    pair<vector<int>, int> father_pair;
+    vector<int> mother(n_cities + 1, 0);
+    int j_mother = 0;
+    pair<vector<int>, int> mother_pair;
+    pair<vector<int>, vector<int>> sons;
+    vector<double> probabilities = {0.1, 0.1, 0.1, 0.1, 0.6};
+    vector<vector<int>> first_pop(pop_size, vector<int>(n_cities + 1, 0));
     double r = 1.;
     vector<int> seed(4, 0);
     int p1 = 0;
     int p2 = 0;
+
     rnd = initialize(rnd, seed, p1, p2, "Primes", "seed.in");
+    genetics.setPopSize(pop_size);
+    genetics.setCitiesPath(n_cities);
+    genetics.setProbabilities(probabilities);
+    genetics.initialize_path(rnd);
+    first_pop = genetics.first_pop(rnd);
 
-    /*
-     CREATION OF THE POPULATION
-    */
-    population.set_size(pop_size);
+    ofstream WriteResults;
+    WriteResults.open("average_circle.dat");
+    ofstream WriteResults1;
+    WriteResults1.open("best_path_circle_coordinates.dat");
 
-    //GENERATION OF THE LABELS AND COORDINATES
-    labels[0] = 1;
-    labels[n_cities] = 1;
-    for (int k = 1; k < n_cities; k++) {
-        labels[k] = k + 1;
-    }
-    for (int j = 0; j < n_cities; j++) {
-        coordinates[j] = rnd.Rannyu(0., 2 * M_PI);
-    }
-    //GENERATION OF THE POPULATION
-    for (int i = 0; i < pop_size; i++) {
-        population(i).initialize(n_cities + 1);
-        population(i).setCity(labels[0], coordinates[0], 0);
-        population(i).setCity(labels[0], coordinates[0], n_cities);
-        for (int j = 1; j < n_cities; j++) {
-            population(i).setCity(labels[j], coordinates[j], j);
+    for (int i = 0; i < n_generations; i++) {
+        best.first = best_path;
+        best.second = j;
+        father_pair.first = father;
+        father_pair.second = j_father;
+        mother_pair.first = mother;
+        mother_pair.second = j_mother;
+        sons.first = father;
+        sons.second = mother;
+        genetics.sort_paths(first_pop);
+        best = genetics.selection_operator(first_pop, rnd, 3);
+        genetics.pair_permutation(rnd.Rannyu(), best.first);
+        genetics.shift_operator(rnd.Rannyu(), best.first, (rand() % (3 - 1 + 1)) + 1, (rand() % (2 - 1 + 1)) + 1);
+        genetics.m_permutation(rnd.Rannyu(), best.first, (rand() % (5 - 1 + 1)) + 1);
+        genetics.inverse_operator(rnd.Rannyu(), best.first, (rand() % (5 - 1 + 1)) + 1);
+        genetics.check_function(best.first);
+        first_pop[pop_size - 1] = best.first;
+        genetics.sort_paths(first_pop);
+        if (rnd.Rannyu() < genetics.getProbabilities()[4]) {
+            father_pair = genetics.selection_operator(first_pop, rnd, 3);
+            mother_pair = genetics.selection_operator(first_pop, rnd, 3);
+            sons = genetics.cross_over_operator(father_pair.first, mother_pair.first);
+            genetics.check_function(sons.first);
+            genetics.check_function(sons.second);
+            first_pop[pop_size - 1] = sons.first;
+            first_pop[pop_size - 2] = sons.second;
         }
+        genetics.sort_paths(first_pop);
+
+        /*
+        if (WriteResults.is_open()) {
+            WriteResults << i << " " << genetics.compute_best_path(first_pop[0], r) << " "
+                         << genetics.compute_half_best_path(first_pop, r) << " " << "\t" << endl;
+        } else cerr << "PROBLEM: Unable to open random.out" << endl;
+        */
     }
 
-    /*
-     * PAIR MUTATION OPERATION: FIRST OPERATION
-     */
-    int count = 1;
-    for (int i = 1; i <= (n_cities - 1) / 2; i++) {
-        int label_i = population(i).getCity(count).getLabel();
-        int label_j = population(i).getCity(count + 1).getLabel();
-        double coordinate_i = population(i).getCity(count).getCoordinate();
-        double coordinate_j = population(i).getCity(count + 1).getCoordinate();
-        swap(label_i, label_j);
-        swap(coordinate_i, coordinate_j);
-        population(i).setCity(label_i, coordinate_i, count);
-        population(i).setCity(label_j, coordinate_j, count + 1);
-        count += 2;
+    //Printing the coordinates of the best path in (x,y) cartesian coordinates
+    for (int k = 0; k <= n_cities - 1; k++) {
+        if (WriteResults1.is_open()) {
+            WriteResults1 << r * cos(genetics.getCityCoordinate(first_pop[0][k])) << " "
+                          << r * sin(genetics.getCityCoordinate(first_pop[0][k])) << " " << "\t" << endl;
+        } else cerr << "PROBLEM: Unable to open random.out" << endl;
     }
 
-    /*
-     * PAIR MUTATION OPERATION: SECOND OPERATION ----> RANDOM PAIR MUTATION
-     */
 
-    for (int i = 0; i < population.size(); i++) {
-        for (int n = 1; n <= pop_size; n++) {
-            int n_1 = (rand() % (33 - 1 + 1)) + 1;
-            int n_2 = (rand() % (33 - 1 + 1)) + 1;
-            int label_i = population(i).getCity(n_1).getLabel();
-            int label_j = population(i).getCity(n_2).getLabel();
-            double coordinate_i = population(i).getCity(n_1).getCoordinate();
-            double coordinate_j = population(i).getCity(n_2).getCoordinate();
-            swap(label_i, label_j);
-            swap(coordinate_i, coordinate_j);
-            population(i).setCity(label_i, coordinate_i, n_1);
-            population(i).setCity(label_j, coordinate_j, n_2);
-        }
-    }
-
-    //THE STARTING POPULATION IS READY
-
-    for (int i = 0; i < population.size(); i++) {
-        for (int k = 0; k <= n_cities; k++) {
-            cout << population(i).getCity(k).getLabel() << " ";
-        }
-        cout << endl;
-    }
-
-    //CHECK THE STARTING POPULATION FULFILS THE BONDS
-    for (int i = 0; i < pop_size; i++) {
-        vector<int> u = population(i).getLabels();
-        //cout << check_function(u) << endl;
-    }
-
-    //SETTING PATH LENGTH FOR EACH PATH OF THE POPULATION
-    for (int i = 0; i < pop_size; i++) {
-        population(i).setPathLength(0.);
-        double path = population(i).getPathLength();
-        for (int k = 0; k <= n_cities - 1; k++) {
-            path += L1_norm(population(i).getCity(k), population(i).getCity(k + 1), r);
-        }
-        population(i).setPathLength(path);
-    }
-
-    //ORDER THE POPULATION ACCORDING TO A FITNESS BASIS (FROM THE LONGEST PATH TO THE SHORTEST PATH)
-
-    // Convertire il field in un vector per utilizzare std::stable_sort
-    vector<Path> population_vector;
-    for (size_t i = 0; i < population.n_elem; ++i) {
-        population_vector.push_back(population(i, 0));
-    }
-
-    // Utilizziamo stable_sort con una lambda function
-    //SISTEMARE L'ALGORITMO DI SORTING
-    stable_sort(population_vector.begin(), population_vector.end(), []( Path &a,  Path &b) {
-        return a.getPathLength() < b.getPathLength();
-    });
-
-    // Copia degli elementi ordinati di nuovo nel field
-    for (size_t i = 0; i < population_vector.size(); ++i) {
-        population(i, 0) = population_vector[i];
-    }
-
-    // Stampa delle persone ordinate
-    for (size_t i = 0; i < population.n_elem; ++i) {
-        cout << population(i).getPathLength() << endl;
-    }
     rnd.SaveSeed();
 
 

@@ -5,17 +5,14 @@
 #ifndef NUMERICALSIMULATIONLABORATORY_PATH_H
 #define NUMERICALSIMULATIONLABORATORY_PATH_H
 
-#include <armadillo>
 #include "City.h"
-#include "functions.h"
 #include <vector>
 
 using namespace std;
-using namespace arma;
 
 class Path {
 private:
-    field<City> path;
+    vector<City> path;
     double path_length;
 public:
     // Default constructor
@@ -24,23 +21,19 @@ public:
     // Destructor
     ~Path();
 
-    void initialize(const int n_cities);
+    void initialize_path(int n);
 
     //Method for getting the city in the path
     City getCity(int i);
 
-    //Method for getting the length of the path
-    double getPathLength();
-
-    //Method for setting the length
-    void setPathLength(double length);
+    //Function for computing the distance between cities (using L-1 norm)
+    double L1_norm(City city_1, City city_2, double r);
 
     //Method for setting the vector of cities in the path
     void setCity(int label, double coordinate, int i);
 
     //Method for getting the vector of labels
     std::vector<int> getLabels();
-
 };
 
 

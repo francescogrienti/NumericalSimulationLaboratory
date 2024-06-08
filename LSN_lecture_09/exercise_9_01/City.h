@@ -28,7 +28,6 @@ public:
 
     //Method for setting the angular coordinate of the city
     void setCoordinate(double coordinate);
-
 };
 
 
