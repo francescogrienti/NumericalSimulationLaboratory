@@ -43,7 +43,7 @@ void writeOnFile(int M, std::vector<int> N, Random rnd, double lambda,
     vector<double> sum100 = function(rnd, N[3], M, lambda);
     if (WriteResults.is_open()) {
         for (int i = 0; i < M; i++) {
-            WriteResults << sum1[i] << " " << sum2[i] << " " << sum10[i] << " " << sum100[i] << "\t" << endl;
+            WriteResults << sum1[i]/N[0] << " " << sum2[i]/N[1] << " " << sum10[i]/N[2] << " " << sum100[i]/N[3] << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults.close();
@@ -59,7 +59,7 @@ void writeOnFile(int M, std::vector<int> N, Random rnd,
     vector<double> sum100 = function(rnd, N[3], M);
     if (WriteResults.is_open()) {
         for (int i = 0; i < M; i++) {
-            WriteResults << sum1[i] << " " << sum2[i] << " " << sum10[i] << " " << sum100[i] << "\t" << endl;
+            WriteResults << sum1[i]/N[0] << " " << sum2[i]/N[1] << " " << sum10[i]/N[2] << " " << sum100[i]/N[3] << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults.close();
@@ -75,7 +75,7 @@ void writeOnFile(int M, std::vector<int> N, Random rnd, double mean, double gamm
     vector<double> sum100 = function(rnd, N[3], M, mean, gamma);
     if (WriteResults.is_open()) {
         for (int i = 0; i < M; i++) {
-            WriteResults << sum1[i] << " " << sum2[i] << " " << sum10[i] << " " << sum100[i] << "\t" << endl;
+            WriteResults << sum1[i]/N[0] << " " << sum2[i]/N[1] << " " << sum10[i]/N[2] << " " << sum100[i]/N[3] << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults.close();
