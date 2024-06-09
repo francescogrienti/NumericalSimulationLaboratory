@@ -26,13 +26,12 @@ using namespace std;
 using namespace arma;
 
 void System::step() { // Perform a simulation step
-    if (_restart) {
-        if (_sim_type == 0) this->Verlet();  // Perform a MD step
-        else
-            for (int i = 0; i < _npart; i++)
-                this->move(int(_rnd.Rannyu() * _npart)); // Perform a MC step on a randomly choosen particle
-        _nattempts += _npart; //update number of attempts performed on the system
-    }
+    if (_sim_type == 0) this->Verlet();  // Perform a MD step
+    else
+        for (int i = 0; i < _npart; i++)
+            this->move(int(_rnd.Rannyu() * _npart)); // Perform a MC step on a randomly choosen particle
+    _nattempts += _npart; //update number of attempts performed on the system
+
     return;
 }
 
@@ -716,13 +715,17 @@ void System::measure() { // Measure properties
     return;
 }
 
-void System::measure_temp() {
+void System::measure_temp(string phase) {
     double kenergy_temp = 0.0; // temporary accumulator for kinetic energy
+    ofstream coutf;
+    coutf.open("../OUTPUT/EQ_" + phase + "/equilibr.dat", ios::app);
     if (_measure_kenergy) {
         for (int i = 0; i < _npart; i++)
             kenergy_temp += 0.5 * dot(_particle(i).getvelocity(), _particle(i).getvelocity());
         kenergy_temp /= double(_npart);
+        coutf << (2.0 / 3.0) * kenergy_temp << endl;
     }
+    coutf.close();
     if ((2.0 / 3.0) * kenergy_temp == _desired_temp) {
         _restart = true;
     }

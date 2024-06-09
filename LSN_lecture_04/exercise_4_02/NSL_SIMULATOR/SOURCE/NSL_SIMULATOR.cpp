@@ -33,14 +33,14 @@ int main(int argc, char *argv[]) {
     SYS.initialize_properties(phase);
     SYS.block_reset(0, phase);
 
-    for (int i = 0; i < SYS.get_nbl() && !breaking; i++) { //loop over blocks
-        for (int j = 0; j < SYS.get_nsteps() && !breaking; j++) { //loop over steps in a block
-            if (!SYS.get_restart()) {
+    for (int i = 0; i < SYS.get_nbl() && breaking == false ; i++) { //loop over blocks
+        for (int j = 0; j < SYS.get_nsteps() && breaking == false; j++) { //loop over steps in a block
+            if (SYS.get_restart() == 1) {
                 breaking = true;
                 SYS.write_configuration(phase);
             } else {
                 SYS.step();
-                SYS.measure_temp();
+                SYS.measure_temp(phase);
             }
         }
     }

@@ -1,4 +1,4 @@
-3/****************************************************************
+/****************************************************************
 *****************************************************************
     _/    _/  _/_/_/  _/       Numerical Simulation Laboratory
    _/_/  _/ _/       _/       Physics Department
@@ -79,7 +79,7 @@ public: // Function declarations
     void step_restart();                // Perform a simulation step
     void block_reset(int blk, string phase);  // Reset block averages
     void measure();             // Measure properties of the system
-    void measure_temp();
+    void measure_temp(string phase);
     void averages(int blk, string phase);     // Compute averages of properties
     double error(double acc, double acc2, int blk); // Compute error
     void move(int part);        // Move a particle
