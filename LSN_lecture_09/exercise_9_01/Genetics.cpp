@@ -8,8 +8,6 @@
 #include <cmath>
 #include "random.h"
 #include <algorithm>
-#include <ctime>
-#include <cstdlib>
 
 using namespace std;
 
@@ -79,7 +77,6 @@ void Genetics::initialize_path_circle(Random &rnd) {
 
 //Creation of the first population using the mutation operator
 vector<vector<int>> Genetics::first_pop(Random &rnd) {
-    const int N_mut = 50;
     vector<vector<int>> population(pop_size, vector<int>(n_cities + 1, 0));
 
     //GENERATION OF THE POPULATION
@@ -92,9 +89,7 @@ vector<vector<int>> Genetics::first_pop(Random &rnd) {
     }
     //FIRST MUTATION: PAIR MUTATION!
     for (int i = 0; i < pop_size; i++) {
-        for (int j = 0; j < N_mut; j++) {
-            pair_permutation(rnd.Rannyu(), population[i], rnd);
-        }
+        random_shuffle(population[i].begin() + 1, population[i].end() - 1);
     }
 
     return population;
@@ -145,8 +140,6 @@ void Genetics::sort_paths(std::vector<vector<int>> &population) {
         population[i] = vecWithVals[i].vec;
     }
 
-    cout << endl;
-
     return;
 }
 
@@ -169,7 +162,6 @@ vector<int> Genetics::selection_operator(const vector<vector<int>> &population, 
 }
 
 //Shift operator
-//CONTROLLARE E AGGIUSTARE n_1!
 void Genetics::shift_operator(double prob, vector<int> &labels, int N_elem, int shift, Random &rnd) {
     if (prob < probabilities[0]) {
         vector<int> labels_elem(N_elem, 0);
@@ -193,7 +185,6 @@ void Genetics::shift_operator(double prob, vector<int> &labels, int N_elem, int 
 }
 
 //M-permutation
-//CONTROLLARE E AGGIUSTARE index1 e index2!
 void Genetics::m_permutation(double prob, vector<int> &labels, int n, Random &rnd) {
     if (prob < probabilities[2]) {
         int len = labels.size();

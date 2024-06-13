@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     vector<int> father(n_cities + 1, 0);
     vector<int> mother(n_cities + 1, 0);
     pair<vector<int>, vector<int>> sons;
-    vector<double> probabilities = {0.08, 0.08, 0.08, 0.08, 0.7};
+    vector<double> probabilities = {0.025, 0.025, 0.025, 0.025, 0.9};
     vector<vector<int>> first_pop_circle(pop_size, vector<int>(n_cities + 1, 0));
     vector<vector<int>> first_pop_square(pop_size, vector<int>(n_cities + 1, 0));
     double r = 1.;
@@ -65,6 +65,9 @@ int main(int argc, char *argv[]) {
 
     rnd = initialize(rnd, seed, p1, p2, "Primes", "seed.in");
 
+
+    //STEADY STATE GENETIC ALGORITHM
+    //SOSTITUIRE LA POPOLAZIONE SANTO IDDDIOOOO!!!!
     //CIRCLE
     genetics_circle.setPopSize(pop_size);
     genetics_circle.setCitiesPath(n_cities);
@@ -135,7 +138,6 @@ int main(int argc, char *argv[]) {
                           << r * sin(genetics_circle.getCityCoordinate(first_pop_circle[0][k])) << " " << "\t" << endl;
         } else cerr << "PROBLEM: Unable to open random.out" << endl;
     }
-
 
     /*
     //SQUARE
