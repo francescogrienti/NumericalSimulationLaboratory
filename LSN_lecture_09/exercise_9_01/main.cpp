@@ -47,15 +47,15 @@ int main(int argc, char *argv[]) {
     Random rnd;
     Genetics genetics_circle;
     Genetics genetics_square;
-    int pop_size = 300;
+    int pop_size = 1000;
     int n_cities = 34;
-    int n_generations = 10000;
+    int n_generations = 200;
 
     vector<int> best_path(n_cities + 1, 0);
     vector<int> father(n_cities + 1, 0);
     vector<int> mother(n_cities + 1, 0);
     pair<vector<int>, vector<int>> sons;
-    vector<double> probabilities = {0.1, 0.1, 0.1, 0.1, 0.9};
+    vector<double> probabilities = {0.08, 0.08, 0.08, 0.08, 0.7};
     vector<vector<int>> first_pop_circle(pop_size, vector<int>(n_cities + 1, 0));
     vector<vector<int>> first_pop_square(pop_size, vector<int>(n_cities + 1, 0));
     double r = 1.;
