@@ -13,7 +13,6 @@ using namespace std;
 class Path {
 private:
     vector<City> path;
-    double path_length;
 public:
     // Default constructor
     Path();

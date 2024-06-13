@@ -57,19 +57,19 @@ public:
     void sort_paths(std::vector<vector<int>> &population);
 
     //Selection function
-    pair<vector<int>, int> selection_operator(const vector<vector<int>> &population, Random &rnd, int p);
+    vector<int> selection_operator(const vector<vector<int>> &population, Random &rnd, int p);
 
     //Pair permutation operator
-    void pair_permutation(double prob, vector<int> &labels);
+    void pair_permutation(double prob, vector<int> &labels, Random &rnd);
 
     //Shift operator
-    void shift_operator(double prob, vector<int> &labels, int N_elem, int shift);
+    void shift_operator(double prob, vector<int> &labels, int N_elem, int shift, Random &rnd);
 
     //M-permutation
-    void m_permutation(double prob, vector<int> &labels, int n);
+    void m_permutation(double prob, vector<int> &labels, int n, Random &rnd);
 
     //Inverse operator
-    void inverse_operator(double prob, vector<int> &labels, int n);
+    void inverse_operator(double prob, vector<int> &labels, int n, Random &rnd);
 
     //Computing distances
     double compute_best_path(vector<int> &labels, double r);
@@ -78,7 +78,7 @@ public:
     double compute_half_best_path(vector<vector<int>> &population, double r);
 
     //Cross-over operator
-    pair<vector<int>, vector<int>> cross_over_operator(vector<int> &parent_1, vector<int> &parent_2);
+    pair<vector<int>, vector<int>> cross_over_operator(vector<int> &parent_1, vector<int> &parent_2, Random &rnd);
 
     //Get coordinates of the city
     double getCityCoordinate(int i);

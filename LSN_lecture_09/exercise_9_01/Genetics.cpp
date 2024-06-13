@@ -79,7 +79,7 @@ void Genetics::initialize_path_circle(Random &rnd) {
 
 //Creation of the first population using the mutation operator
 vector<vector<int>> Genetics::first_pop(Random &rnd) {
-    const int N_mut = 100;
+    const int N_mut = 50;
     vector<vector<int>> population(pop_size, vector<int>(n_cities + 1, 0));
 
     //GENERATION OF THE POPULATION
@@ -92,8 +92,8 @@ vector<vector<int>> Genetics::first_pop(Random &rnd) {
     }
     //FIRST MUTATION: PAIR MUTATION!
     for (int i = 0; i < pop_size; i++) {
-        for (int j = 1; j < N_mut; j++) {
-            pair_permutation(rnd.Rannyu(), population[i]);
+        for (int j = 0; j < N_mut; j++) {
+            pair_permutation(rnd.Rannyu(), population[i], rnd);
         }
     }
 
@@ -130,7 +130,7 @@ void Genetics::sort_paths(std::vector<vector<int>> &population) {
     };
 
     std::vector<VecWithVal> vecWithVals(population.size());
-    for (int i = 0; i < population.size(); ++i) {
+    for (int i = 0; i < population.size(); i++) {
         vecWithVals[i].vec = population[i];
         vecWithVals[i].value = path_length[i];
     }
@@ -141,16 +141,20 @@ void Genetics::sort_paths(std::vector<vector<int>> &population) {
 
     std::sort(vecWithVals.begin(), vecWithVals.end(), compare);
 
-    for (int i = 0; i < population.size(); ++i) {
+    for (int i = 0; i < population.size(); i++) {
         population[i] = vecWithVals[i].vec;
     }
+
+    cout << endl;
+
+    return;
 }
 
-void Genetics::pair_permutation(double prob, vector<int> &labels) {
+void Genetics::pair_permutation(double prob, vector<int> &labels, Random &rnd) {
     if (prob < probabilities[0]) {
         //Generation of two random integer numbers to select the pair indeces to be muted
-        int n_1 = (rand() % (33 - 1 + 1)) + 1;
-        int n_2 = (rand() % (33 - 1 + 1)) + 1;
+        int n_1 = int(rnd.Rannyu(1., 34.));
+        int n_2 = int(rnd.Rannyu(1., 34.));
         swap(labels[n_1], labels[n_2]);
     }
 
@@ -158,19 +162,19 @@ void Genetics::pair_permutation(double prob, vector<int> &labels) {
 }
 
 //Selection operator
-pair<vector<int>, int> Genetics::selection_operator(const vector<vector<int>> &population, Random &rnd, int p) {
-    double r = rnd.Rannyu();
-    int j = int(population.size() * pow(r, p));
-    return {population[j], j};
+vector<int> Genetics::selection_operator(const vector<vector<int>> &population, Random &rnd, int p) {
+    double s = rnd.Rannyu();
+    int j = int(population.size() * pow(s, p));
+    return population[j];
 }
 
 //Shift operator
 //CONTROLLARE E AGGIUSTARE n_1!
-void Genetics::shift_operator(double prob, vector<int> &labels, int N_elem, int shift) {
+void Genetics::shift_operator(double prob, vector<int> &labels, int N_elem, int shift, Random &rnd) {
     if (prob < probabilities[0]) {
         vector<int> labels_elem(N_elem, 0);
         vector<int> last_labels(shift, 0);
-        int n_1 = (rand() % (20 - 5 + 1)) + 2;
+        int n_1 = int(rnd.Rannyu(2., 20.));
         for (int i = 0; i < N_elem; i++) {
             labels_elem[i] = labels[n_1 + i];
         }
@@ -184,11 +188,13 @@ void Genetics::shift_operator(double prob, vector<int> &labels, int N_elem, int 
             labels[n_1 + shift + i] = labels_elem[i];
         }
     }
+
+    return;
 }
 
 //M-permutation
 //CONTROLLARE E AGGIUSTARE index1 e index2!
-void Genetics::m_permutation(double prob, vector<int> &labels, int n) {
+void Genetics::m_permutation(double prob, vector<int> &labels, int n, Random &rnd) {
     if (prob < probabilities[2]) {
         int len = labels.size();
 
@@ -197,11 +203,10 @@ void Genetics::m_permutation(double prob, vector<int> &labels, int n) {
             return;
         }
 
-        std::srand(std::time(0));
-        int index1 = (rand() % (20 - 5 + 1)) + 5;
+        int index1 = int(rnd.Rannyu(2., 20.));
         int index2;
         do {
-            index2 = (rand() % (20 - 5 + 1)) + 5;
+            index2 = int(rnd.Rannyu(1., 20.));
         } while (index1 == index2);
 
         // Scambia gli elementi dei due sotto-array
@@ -209,13 +214,15 @@ void Genetics::m_permutation(double prob, vector<int> &labels, int n) {
             std::swap(labels[index1 + i], labels[index2 + i]);
         }
     }
+
+    return;
 }
 
 //Inverse operator
-void Genetics::inverse_operator(double prob, vector<int> &labels, int n) {
+void Genetics::inverse_operator(double prob, vector<int> &labels, int n, Random &rnd) {
     if (prob < probabilities[3]) {
         int len = labels.size();
-        int start = (rand() % (20 - 5 + 1)) + 5;
+        int start = int(rnd.Rannyu(2., 20.));
 
         if (len < start + n) {
             std::cerr << "Array too small to contain a subarray of length " << n << " starting at index " << start
@@ -233,17 +240,16 @@ void Genetics::inverse_operator(double prob, vector<int> &labels, int n) {
             end--;
         }
     }
+
+    return;
 }
 
 pair<vector<int>, vector<int>>
-Genetics::cross_over_operator(vector<int> &parent_1, vector<int> &parent_2) {
+Genetics::cross_over_operator(vector<int> &parent_1, vector<int> &parent_2, Random &rnd) {
     int len = parent_1.size();
 
-    // Inizializza la generazione di numeri casuali
-    std::srand(std::time(0));
-
     // Scegli un punto di crossover casuale, escludendo l'ultimo elemento
-    int crossover_point = std::rand() % (len - 1);
+    int crossover_point = int(rnd.Rannyu(1., len - 1));
 
     // Array per i figli, escluso l'ultimo elemento
     std::vector<int> offspring1(parent_1.begin(), parent_1.begin() + crossover_point);
