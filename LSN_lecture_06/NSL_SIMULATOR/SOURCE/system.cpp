@@ -879,7 +879,8 @@ void System::measure() { // Measure properties
         _measurement(_index_magnet) = spin_sum_magnet;
     }
 
-    // SPECIFIC HEAT /////////////////////////////////////////////////////////////
+    //SPECIFIC HEAT /////////////////////////////////////////////////////////////
+    //RIVEDERE CALCOLO DEL CALORE SPECIFICO (SENTI TOMMASO)
     if (_measure_cv) {
         double s_i, s_j;
         for (int i = 0; i < _npart; i++) {
