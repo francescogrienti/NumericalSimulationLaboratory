@@ -40,7 +40,6 @@ void equilibration(string method) {
 //La simulazione parte dalla temperatura più elevata perché il sistema, essendo maggiormente disordinato, si trova più vicino
 //all'equilibrio, quindi impiega pochi passi per raggiungere l'equilibrio.
 
-//FINIRE IL CODICE DEL MAIN AGGIUNGENDO L'EQUILIBRAZIONE (GUARDANDO I GRAFICI) E STOP
 
 using namespace std;
 

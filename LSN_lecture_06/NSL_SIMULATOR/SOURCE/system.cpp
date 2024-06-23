@@ -120,6 +120,7 @@ bool System::metro(int i) { // Metropolis algorithm
     if (_rnd.Rannyu() < acceptance) decision = true; //Metropolis acceptance step
     return decision;
 }
+
 double System::Boltzmann(int i, bool xnew) {
     double energy_i = 0.0;
     double dx, dy, dz, dr;
@@ -162,13 +163,14 @@ System::initialize(
     _rnd.SetRandom(seed, p1, p2);
 
     ofstream couta(
-            "../OUTPUT/OUTPUT_" + method + "/acceptance.dat"); // Set the heading line in file ../OUTPUT/acceptance.dat
+            "../OUTPUT/OUTPUT_" + method + "/acceptance_" + to_string(_H) +
+            ".dat"); // Set the heading line in file ../OUTPUT/acceptance.dat
     couta << "#   N_BLOCK:  ACCEPTANCE:" << endl;
     couta.close();
 
     ifstream input("../INPUT/input.dat"); // Start reading ../INPUT/input.dat
     ofstream coutf;
-    coutf.open("../OUTPUT/OUTPUT_" + method + "/output.dat");
+    coutf.open("../OUTPUT/OUTPUT_" + method + "/output_" + to_string(_H) + ".dat");
     string property;
     double delta;
     while (!input.eof()) {
@@ -492,7 +494,7 @@ void System::initialize_properties(string method) { // Initialize data members u
                 index_property++;
             } else if (property == "ENDPROPERTIES") {
                 ofstream coutf;
-                coutf.open("../OUTPUT/OUTPUT_" + method + "/output.dat", ios::app);
+                coutf.open("../OUTPUT/OUTPUT_" + method + "/output_" + to_string(_H) + ".dat", ios::app);
                 coutf << "Reading properties completed!" << endl;
                 coutf.close();
                 break;
@@ -615,7 +617,7 @@ System::initialize_properties_eq(
                 index_property++;
             } else if (property == "ENDPROPERTIES") {
                 ofstream coutf;
-                coutf.open("../OUTPUT/EQUILIBRATION_" + method + "/output.dat", ios::app);
+                coutf.open("../OUTPUT/EQUILIBRATION_" + method + "/output_" + to_string(_H) + ".dat", ios::app);
                 coutf << "Reading properties completed!" << endl;
                 coutf.close();
                 break;
@@ -642,7 +644,7 @@ void System::finalize(string method) {
     this->write_configuration();
     _rnd.SaveSeed();
     ofstream coutf;
-    coutf.open("../OUTPUT/OUTPUT_" + method + "/output.dat", ios::app);
+    coutf.open("../OUTPUT/OUTPUT_" + method + "/output_" + to_string(_H) + ".dat", ios::app);
     coutf << "Simulation completed!" << endl;
     coutf.close();
 
@@ -797,7 +799,7 @@ void System::read_configuration() {
 void System::block_reset(int blk, string method) { // Reset block accumulators to zero
     ofstream coutf;
     if (blk > 0) {
-        coutf.open("../OUTPUT/OUTPUT_" + method + "/output.dat", ios::app);
+        coutf.open("../OUTPUT/OUTPUT_" + method + "/output_" + to_string(_H) + ".dat", ios::app);
         coutf << "Block completed: " << blk << endl;
         coutf.close();
     }
@@ -814,13 +816,11 @@ void System::measure() { // Measure properties
     double penergy_temp = 0.0, dr; // temporary accumulator for potential energy
     double kenergy_temp = 0.0; // temporary accumulator for kinetic energy
     double tenergy_temp = 0.0;
-    double tenergy2_temp = 0.;
-    double tenergy_temp_2 = 0.;
+    double tenergy2_temp = 0.0;
     double spin_sum_chi = 0.;
     double spin_sum_magnet = 0.;
     double pressure_temp = 0.0;
-    double magnetization = 0.0;
-    double virial = 0.0;
+
     if (_measure_penergy or _measure_pressure or _measure_gofr) {
         for (int i = 0; i < _npart - 1; i++) {
             for (int j = i + 1; j < _npart; j++) {
@@ -860,8 +860,8 @@ void System::measure() { // Measure properties
                 s_j = double(_particle(this->pbc(i + 1)).getspin());
                 tenergy_temp += (-1.) * _J * s_i * s_j - 0.5 * _H * (s_i + s_j);
             }
-            tenergy_temp /= double(_npart);
             _measurement(_index_tenergy) = tenergy_temp;
+
         }
     }
     // TEMPERATURE ///////////////////////////////////////////////////////////////
@@ -879,30 +879,28 @@ void System::measure() { // Measure properties
         _measurement(_index_magnet) = spin_sum_magnet;
     }
 
-    //SPECIFIC HEAT /////////////////////////////////////////////////////////////
-    //RIVEDERE CALCOLO DEL CALORE SPECIFICO (SENTI TOMMASO)
+
+    //ERRORE NEL CALCOLO, PRINTA GLI STESSI VALORI
+    // SPECIFIC HEAT /////////////////////////////////////////////////////////////
     if (_measure_cv) {
         double s_i, s_j;
         for (int i = 0; i < _npart; i++) {
             s_i = double(_particle(i).getspin());
             s_j = double(_particle(this->pbc(i + 1)).getspin());
-            tenergy2_temp += pow(-_J * s_i * s_j - 0.5 * _H * (s_i + s_j), 2);
-            tenergy_temp_2 += (-1.) * _J * s_i * s_j - 0.5 * _H * (s_i + s_j);
+            tenergy2_temp += (-1.) * _J * s_i * s_j - 0.5 * _H * (s_i + s_j);
         }
-        tenergy2_temp /= double(_npart);
-        tenergy_temp_2 /= double(_npart);
-        _measurement(_index_cv) = pow(_beta, 2) * (tenergy2_temp - pow(tenergy_temp_2, 2));
+        _measurement(_index_cv) = pow(tenergy2_temp, 2);
+
     }
     // SUSCEPTIBILITY ////////////////////////////////////////////////////////////
     if (_measure_chi) {
         for (int i = 0; i < _npart; i++) {
             spin_sum_chi += double(_particle(i).getspin());
         }
-        spin_sum_chi = pow(spin_sum_chi, 2) / double(_npart);
-        _measurement(_index_chi) = _beta * spin_sum_chi;
+        spin_sum_chi = pow(spin_sum_chi, 2);
+        _measurement(_index_chi) = spin_sum_chi;
     }
     _block_av += _measurement; //Update block accumulators
-
     return;
 }
 
@@ -995,19 +993,16 @@ void System::measure_eq(string method) { // Measure properties
             s_i = double(_particle(i).getspin());
             s_j = double(_particle(this->pbc(i + 1)).getspin());
             tenergy2_temp += pow(-_J * s_i * s_j - 0.5 * _H * (s_i + s_j), 2);
-            tenergy_temp_2 += (-1.) * _J * s_i * s_j - 0.5 * _H * (s_i + s_j);
         }
-        tenergy2_temp /= double(_npart);
-        tenergy_temp_2 /= double(_npart);
-        _measurement(_index_cv) = pow(_beta, 2) * (tenergy2_temp - pow(tenergy_temp_2, 2));
+        _measurement(_index_cv) = tenergy2_temp;
     }
     // SUSCEPTIBILITY ////////////////////////////////////////////////////////////
     if (_measure_chi) {
         for (int i = 0; i < _npart; i++) {
             spin_sum_chi += double(_particle(i).getspin());
         }
-        spin_sum_chi = pow(spin_sum_chi, 2) / double(_npart);
-        _measurement(_index_chi) = _beta * spin_sum_chi;
+        spin_sum_chi = pow(spin_sum_chi, 2);
+        _measurement(_index_chi) = spin_sum_chi;
     }
     _block_av += _measurement; //Update block accumulators
 
@@ -1020,6 +1015,10 @@ void System::averages(int blk, string method) {
     double average, sum_average, sum_ave2;
 
     _average = _block_av / double(_nsteps);
+    _average(_index_cv) =
+            pow(_beta, 2) * (_average(_index_cv) - pow(_average(_index_tenergy), 2)) / (double) _npart; //Specific heat
+    _average(_index_chi) = (_beta * (_average(_index_chi))) / (double) _npart;
+    _average(_index_tenergy) /= (double) _npart;
     _global_av += _average;
     _global_av2 += _average % _average; // % -> element-wise multiplication
 
@@ -1059,7 +1058,7 @@ void System::averages(int blk, string method) {
         //      << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
         //coutf.close();
         if (blk == _nblocks) {
-            coutf.open("../OUTPUT/OUTPUT_" + method + "/energy_temp.dat", ios::app);
+            coutf.open("../OUTPUT/OUTPUT_" + method + "/energy_temp_" + to_string(_H) + ".dat", ios::app);
             coutf << setw(12) << _temp
                   << setw(12) << sum_average / double(blk)
                   << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
@@ -1104,7 +1103,7 @@ void System::averages(int blk, string method) {
         //      << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
         // coutf.close();
         if (blk == _nblocks) {
-            coutf.open("../OUTPUT/OUTPUT_" + method + "/magnetization_temp.dat", ios::app);
+            coutf.open("../OUTPUT/OUTPUT_" + method + "/magnetization_temp_" + to_string(_H) + ".dat", ios::app);
             coutf << setw(12) << _temp
                   << setw(12) << sum_average / double(blk)
                   << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
@@ -1123,7 +1122,7 @@ void System::averages(int blk, string method) {
         //      << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
         // coutf.close();
         if (blk == _nblocks) {
-            coutf.open("../OUTPUT/OUTPUT_" + method + "/specific_heat_temp.dat", ios::app);
+            coutf.open("../OUTPUT/OUTPUT_" + method + "/specific_heat_temp_" + to_string(_H) + ".dat", ios::app);
             coutf << setw(12) << _temp
                   << setw(12) << sum_average / double(blk)
                   << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
@@ -1142,7 +1141,7 @@ void System::averages(int blk, string method) {
         //      << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
         //coutf.close();
         if (blk == _nblocks) {
-            coutf.open("../OUTPUT/OUTPUT_" + method + "/susceptibility_temp.dat", ios::app);
+            coutf.open("../OUTPUT/OUTPUT_" + method + "/susceptibility_temp_" + to_string(_H) + ".dat", ios::app);
             coutf << setw(12) << _temp
                   << setw(12) << sum_average / double(blk)
                   << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
@@ -1151,7 +1150,7 @@ void System::averages(int blk, string method) {
     }
     // ACCEPTANCE ////////////////////////////////////////////////////////////////
     double fraction;
-    coutf.open("../OUTPUT/OUTPUT_" + method + "/acceptance.dat", ios::app);
+    coutf.open("../OUTPUT/OUTPUT_" + method + "/acceptance_" + to_string(_H) + ".dat", ios::app);
     if (_nattempts > 0) fraction = double(_naccepted) / double(_nattempts);
     else fraction = 0.0;
     coutf << setw(12) << blk << setw(12) << fraction << endl;

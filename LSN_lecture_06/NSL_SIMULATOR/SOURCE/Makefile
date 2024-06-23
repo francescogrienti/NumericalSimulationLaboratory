@@ -15,8 +15,6 @@ random.o : random.cpp random.h
 clean :
 	rm *.o simulator.exe
 remove:
-	rm ../OUTPUT/EQUILIBRATION_GIBBS/*.*
-	rm ../OUTPUT/EQUILIBRATION_METROPOLIS/*.*
-	rm ../OUTPUT/OUTPUT_GIBBS/*.*
+
 	rm ../OUTPUT/CONFIG/*.*
 	rm ../INPUT/CONFIG/config.spin
