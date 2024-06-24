@@ -12,7 +12,6 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include "system.h"
 
 
-/*
 void equilibration(string method) {
     int nconf = 1;
     int n_part = 50;
@@ -22,12 +21,12 @@ void equilibration(string method) {
 
     for (int i = 0; i < SYS.get_nbl(); i++) { //loop over blocks
         for (int j = 0; j < SYS.get_nsteps(); j++) { //loop over steps in a block
-            for (int k = 0; k < n_part; k++){
+            for (int k = 0; k < n_part; k++) {
                 SYS.step_eq(k);
                 SYS.measure_eq(method);
             }
             if (j % 10 == 0) {
-                //        SYS.write_XYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"!
+                //SYS.write_XYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"!
                 nconf++;
             }
         }
@@ -35,7 +34,6 @@ void equilibration(string method) {
     return;
 }
 
-*/
 
 //La simulazione parte dalla temperatura più elevata perché il sistema, essendo maggiormente disordinato, si trova più vicino
 //all'equilibrio, quindi impiega pochi passi per raggiungere l'equilibrio.
@@ -57,8 +55,10 @@ int main(int argc, char *argv[]) {
     string method = argv[1];
 
     //System SYS;
-    //equilibration(method);
+    equilibration(method);
 
+
+    /*
     int nconf = 1;
     System SYS;
     SYS.initialize(method);
@@ -78,6 +78,7 @@ int main(int argc, char *argv[]) {
         SYS.block_reset(i + 1, method);
     }
     SYS.finalize(method);
+    */
 
     return 0;
 }

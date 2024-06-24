@@ -258,11 +258,6 @@ System::initialize_eq(
     Seed >> seed[0] >> seed[1] >> seed[2] >> seed[3];
     _rnd.SetRandom(seed, p1, p2);
 
-    ofstream couta("../OUTPUT/EQUILIBRATION_" + method +
-                   "/acceptance.dat"); // Set the heading line in file ../OUTPUT/acceptance.dat
-    couta << "#   N_BLOCK:  ACCEPTANCE:" << endl;
-    couta.close();
-
     ifstream input("../INPUT/input.dat"); // Start reading ../INPUT/input.dat
     ofstream coutf;
     coutf.open("../OUTPUT/EQUILIBRATION_" + method + "/output.dat");
@@ -557,7 +552,7 @@ System::initialize_properties_eq(
                 _index_kenergy = index_property;
                 index_property++;
             } else if (property == "TOTAL_ENERGY") {
-                ofstream coutt("../OUTPUT/EQUILIBRATION_" + method + "/total_energy.dat");
+                ofstream coutt("../OUTPUT/EQUILIBRATION_" + method + "/total_energy_" + to_string(_temp) + ".dat");
                 coutt << "#     ACTUAL_TE:" << endl;
                 coutt.close();
                 _nprop++;
@@ -617,7 +612,7 @@ System::initialize_properties_eq(
                 index_property++;
             } else if (property == "ENDPROPERTIES") {
                 ofstream coutf;
-                coutf.open("../OUTPUT/EQUILIBRATION_" + method + "/output_" + to_string(_H) + ".dat", ios::app);
+                coutf.open("../OUTPUT/EQUILIBRATION_" + method + "/output.dat", ios::app);
                 coutf << "Reading properties completed!" << endl;
                 coutf.close();
                 break;
@@ -913,13 +908,8 @@ void System::measure_eq(string method) { // Measure properties
     double penergy_temp = 0.0, dr; // temporary accumulator for potential energy
     double kenergy_temp = 0.0; // temporary accumulator for kinetic energy
     double tenergy_temp = 0.0;
-    double tenergy2_temp = 0.;
-    double tenergy_temp_2 = 0.;
-    double spin_sum_chi = 0.;
     double spin_sum_magnet = 0.;
     double pressure_temp = 0.0;
-    double magnetization = 0.0;
-    double virial = 0.0;
     if (_measure_penergy or _measure_pressure or _measure_gofr) {
         for (int i = 0; i < _npart - 1; i++) {
             for (int j = i + 1; j < _npart; j++) {
@@ -962,7 +952,7 @@ void System::measure_eq(string method) { // Measure properties
             }
             tenergy_temp /= double(_npart);
             _measurement(_index_tenergy) = tenergy_temp;
-            coutf.open("../OUTPUT/EQUILIBRATION_" + method + "/total_energy.dat", ios::app);
+            coutf.open("../OUTPUT/EQUILIBRATION_" + method + "/total_energy_" + to_string(_temp) + ".dat", ios::app);
             coutf << setw(12) << _measurement(_index_tenergy) << endl;
             coutf.close();
         }
@@ -984,25 +974,6 @@ void System::measure_eq(string method) { // Measure properties
         coutf.open("../OUTPUT/EQUILIBRATION_" + method + "/magnetization.dat", ios::app);
         coutf << setw(12) << _measurement(_index_magnet) << endl;
         coutf.close();
-    }
-
-    // SPECIFIC HEAT /////////////////////////////////////////////////////////////
-    if (_measure_cv) {
-        double s_i, s_j;
-        for (int i = 0; i < _npart; i++) {
-            s_i = double(_particle(i).getspin());
-            s_j = double(_particle(this->pbc(i + 1)).getspin());
-            tenergy2_temp += pow(-_J * s_i * s_j - 0.5 * _H * (s_i + s_j), 2);
-        }
-        _measurement(_index_cv) = tenergy2_temp;
-    }
-    // SUSCEPTIBILITY ////////////////////////////////////////////////////////////
-    if (_measure_chi) {
-        for (int i = 0; i < _npart; i++) {
-            spin_sum_chi += double(_particle(i).getspin());
-        }
-        spin_sum_chi = pow(spin_sum_chi, 2);
-        _measurement(_index_chi) = spin_sum_chi;
     }
     _block_av += _measurement; //Update block accumulators
 
