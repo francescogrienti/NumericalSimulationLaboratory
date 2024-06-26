@@ -23,8 +23,8 @@ void equilibration(string method) {
         for (int j = 0; j < SYS.get_nsteps(); j++) { //loop over steps in a block
             for (int k = 0; k < n_part; k++) {
                 SYS.step_eq(k);
-                SYS.measure_eq(method);
             }
+            SYS.measure_eq(method);
             if (j % 10 == 0) {
                 //SYS.write_XYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"!
                 nconf++;

@@ -1,4 +1,4 @@
-SIMULATION_TYPE        2    1.0    0.0
+SIMULATION_TYPE        3   1.0    0.0
 RESTART                1
 TEMP                   2.0
 NPART                  50
@@ -6,5 +6,5 @@ RHO                    1.0
 R_CUT                  0.0
 DELTA                  0.0
 NBLOCKS                1
-NSTEPS                 100000
+NSTEPS                 10000
 ENDINPUT
