@@ -14,6 +14,7 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include "random.h"
 #include <vector>
 #include <cmath>
+#include <algorithm>
 
 //RANDOM NUMBER GENERATOR INITIALIZATION
 
@@ -47,15 +48,15 @@ int main(int argc, char *argv[]) {
     Random rnd;
     Genetics genetics_circle;
     Genetics genetics_square;
-    int pop_size = 1000;
+    int pop_size = 100;
     int n_cities = 34;
-    int n_generations = 300;
+    int n_generations = 800;
 
     vector<int> best_path(n_cities + 1, 0);
     vector<int> father(n_cities + 1, 0);
     vector<int> mother(n_cities + 1, 0);
     pair<vector<int>, vector<int>> sons;
-    vector<double> probabilities = {0.02, 0.02, 0.02, 0.02, 0.9};
+    vector<double> probabilities = {0.0, 0.055, 0.055, 0.055, 0.9};
     vector<vector<int>> first_pop_circle(pop_size, vector<int>(n_cities + 1, 0));
     vector<vector<int>> evo_circle;
     vector<vector<int>> first_pop_square(pop_size, vector<int>(n_cities + 1, 0));
@@ -69,7 +70,6 @@ int main(int argc, char *argv[]) {
 
 
     //STEADY STATE GENETIC ALGORITHM (SCRIVERLO NEL NOTEBOOK CHE SI È PROVATO AD USARE STEADY STATE)
-    //SOSTITUIRE LA POPOLAZIONE SANTO IDDDIOOOO!!!!
     //CIRCLE
     genetics_circle.setPopSize(pop_size);
     genetics_circle.setCitiesPath(n_cities);
@@ -85,37 +85,37 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < n_generations; i++) {
         genetics_circle.sort_paths(first_pop_circle);
         for (int k = 0; k < pop_size / 2; k++) {
-            sons.first = father;
-            sons.second = mother;
             if (rnd.Rannyu() < genetics_circle.getProbabilities()[4]) {
-                father = genetics_circle.selection_operator(first_pop_circle, rnd, 4);
-                mother = genetics_circle.selection_operator(first_pop_circle, rnd, 4);
+                father = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
+                mother = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
                 sons = genetics_circle.cross_over_operator(father, mother, rnd);
                 genetics_circle.check_function(sons.first);
                 genetics_circle.check_function(sons.second);
                 evo_circle.push_back(sons.first);
                 evo_circle.push_back(sons.second);
+                first_pop_circle.erase(remove(first_pop_circle.begin(), first_pop_circle.end(), father), first_pop_circle.end());
+                first_pop_circle.erase(remove(first_pop_circle.begin(), first_pop_circle.end(), mother), first_pop_circle.end());
             }
             evo_circle.push_back(father);
             evo_circle.push_back(mother);
         }
         genetics_circle.sort_paths(evo_circle);
-        best_path = genetics_circle.selection_operator(evo_circle, rnd, 4);
+        best_path = genetics_circle.selection_operator(evo_circle, rnd, 3);
         genetics_circle.pair_permutation(rnd.Rannyu(), best_path, rnd);
         genetics_circle.check_function(best_path);
         evo_circle[pop_size - 1] = best_path;
         genetics_circle.sort_paths(evo_circle);
-        best_path = genetics_circle.selection_operator(evo_circle, rnd, 4);
+        best_path = genetics_circle.selection_operator(evo_circle, rnd, 3);
         genetics_circle.shift_operator(rnd.Rannyu(), best_path, int(rnd.Rannyu(1, 4)), int(rnd.Rannyu(1, 3)), rnd);
         genetics_circle.check_function(best_path);
         evo_circle[pop_size - 1] = best_path;
         genetics_circle.sort_paths(evo_circle);
-        best_path = genetics_circle.selection_operator(evo_circle, rnd, 4);
+        best_path = genetics_circle.selection_operator(evo_circle, rnd, 3);
         genetics_circle.m_permutation(rnd.Rannyu(), best_path, int(rnd.Rannyu(1, 6)), rnd);
         genetics_circle.check_function(best_path);
         evo_circle[pop_size - 1] = best_path;
         genetics_circle.sort_paths(evo_circle);
-        best_path = genetics_circle.selection_operator(evo_circle, rnd, 4);
+        best_path = genetics_circle.selection_operator(evo_circle, rnd, 3);
         genetics_circle.inverse_operator(rnd.Rannyu(), best_path, int(rnd.Rannyu(1, 6)), rnd);
         genetics_circle.check_function(best_path);
         evo_circle[pop_size - 1] = best_path;
