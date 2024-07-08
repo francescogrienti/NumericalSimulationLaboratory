@@ -297,3 +297,12 @@ double Genetics::getCityCoordinate(int i) {
     return path.getCity(i).getCoordinate();
 }
 
+
+void Genetics::mutation(Random &rnd) {
+    double r = rnd.Rannyu();
+    if (r >= 0. && r <= 0.025) {
+    } else if (r >= 0.025 && r <= 0.050 ) {
+    } else if (r >= 0.050 && r <= 0.075) {
+    } else {
+    }
+}

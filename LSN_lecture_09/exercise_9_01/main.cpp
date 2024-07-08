@@ -48,15 +48,15 @@ int main(int argc, char *argv[]) {
     Random rnd;
     Genetics genetics_circle;
     Genetics genetics_square;
-    int pop_size = 100;
+    int pop_size = 400;
     int n_cities = 34;
-    int n_generations = 800;
+    int n_generations = 600;
 
     vector<int> best_path(n_cities + 1, 0);
     vector<int> father(n_cities + 1, 0);
     vector<int> mother(n_cities + 1, 0);
     pair<vector<int>, vector<int>> sons;
-    vector<double> probabilities = {0.0, 0.055, 0.055, 0.055, 0.9};
+    vector<double> probabilities = {0.05, 0.05, 0.05, 0.05, 0.9};
     vector<vector<int>> first_pop_circle(pop_size, vector<int>(n_cities + 1, 0));
     vector<vector<int>> evo_circle;
     vector<vector<int>> first_pop_square(pop_size, vector<int>(n_cities + 1, 0));
@@ -82,6 +82,8 @@ int main(int argc, char *argv[]) {
     ofstream WriteResults1;
     WriteResults1.open("best_path_circle_coordinates.dat");
 
+    //MUTAZIONE MI DA' VARIABILITÀ, DEVO AVERE ALGORITMO CHE SELEZIONA I MIGLIORI
+    //SELEZIONARE LA MUTAZIONE IN UN RANGE A CASO (0-0.025, 0.025-0.05, 0.05-0.075, 0.1).
     for (int i = 0; i < n_generations; i++) {
         genetics_circle.sort_paths(first_pop_circle);
         for (int k = 0; k < pop_size / 2; k++) {
@@ -91,18 +93,18 @@ int main(int argc, char *argv[]) {
                 sons = genetics_circle.cross_over_operator(father, mother, rnd);
                 genetics_circle.check_function(sons.first);
                 genetics_circle.check_function(sons.second);
+                genetics_circle.pair_permutation(rnd.Rannyu(), sons.first, rnd);
+                genetics_circle.pair_permutation(rnd.Rannyu(), sons.second, rnd);;
                 evo_circle.push_back(sons.first);
                 evo_circle.push_back(sons.second);
-                first_pop_circle.erase(remove(first_pop_circle.begin(), first_pop_circle.end(), father), first_pop_circle.end());
-                first_pop_circle.erase(remove(first_pop_circle.begin(), first_pop_circle.end(), mother), first_pop_circle.end());
             }
             evo_circle.push_back(father);
             evo_circle.push_back(mother);
         }
+        /*
         genetics_circle.sort_paths(evo_circle);
         best_path = genetics_circle.selection_operator(evo_circle, rnd, 3);
-        genetics_circle.pair_permutation(rnd.Rannyu(), best_path, rnd);
-        genetics_circle.check_function(best_path);
+
         evo_circle[pop_size - 1] = best_path;
         genetics_circle.sort_paths(evo_circle);
         best_path = genetics_circle.selection_operator(evo_circle, rnd, 3);
@@ -120,6 +122,7 @@ int main(int argc, char *argv[]) {
         genetics_circle.check_function(best_path);
         evo_circle[pop_size - 1] = best_path;
         genetics_circle.sort_paths(evo_circle);
+        */
         first_pop_circle = evo_circle;
         evo_circle.clear();
 

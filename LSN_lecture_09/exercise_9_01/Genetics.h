@@ -71,6 +71,9 @@ public:
     //Inverse operator
     void inverse_operator(double prob, vector<int> &labels, int n, Random &rnd);
 
+    //Function for the mutation
+    void mutation(Random &rnd);
+
     //Computing distances
     double compute_best_path(vector<int> &labels, double r);
 
