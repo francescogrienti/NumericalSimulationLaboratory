@@ -48,20 +48,20 @@ int main(int argc, char *argv[]) {
     Random rnd;
     Genetics genetics_circle;
     Genetics genetics_square;
-    int pop_size = 400;
+    int pop_size = 800000;
     int n_cities = 34;
-    int n_generations = 600;
+    int n_generations = 60;
 
     vector<int> best_path(n_cities + 1, 0);
     vector<int> father(n_cities + 1, 0);
     vector<int> mother(n_cities + 1, 0);
     pair<vector<int>, vector<int>> sons;
-    vector<double> probabilities = {0.05, 0.05, 0.05, 0.05, 0.9};
     vector<vector<int>> first_pop_circle(pop_size, vector<int>(n_cities + 1, 0));
     vector<vector<int>> evo_circle;
     vector<vector<int>> first_pop_square(pop_size, vector<int>(n_cities + 1, 0));
     vector<vector<int>> evo_square(pop_size, vector<int>(n_cities + 1, 0));
     double r = 1.;
+    vector<double> probab = {0.05, 0.05, 0.05, 0.05, 0.9};
     vector<int> seed(4, 0);
     int p1 = 0;
     int p2 = 0;
@@ -73,7 +73,6 @@ int main(int argc, char *argv[]) {
     //CIRCLE
     genetics_circle.setPopSize(pop_size);
     genetics_circle.setCitiesPath(n_cities);
-    genetics_circle.setProbabilities(probabilities);
     genetics_circle.initialize_path_circle(rnd);
     first_pop_circle = genetics_circle.first_pop(rnd);
 
@@ -83,18 +82,17 @@ int main(int argc, char *argv[]) {
     WriteResults1.open("best_path_circle_coordinates.dat");
 
     //MUTAZIONE MI DA' VARIABILITÀ, DEVO AVERE ALGORITMO CHE SELEZIONA I MIGLIORI
-    //SELEZIONARE LA MUTAZIONE IN UN RANGE A CASO (0-0.025, 0.025-0.05, 0.05-0.075, 0.1).
     for (int i = 0; i < n_generations; i++) {
         genetics_circle.sort_paths(first_pop_circle);
         for (int k = 0; k < pop_size / 2; k++) {
-            if (rnd.Rannyu() < genetics_circle.getProbabilities()[4]) {
+            if (rnd.Rannyu() < probab[4]) {
                 father = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
                 mother = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
                 sons = genetics_circle.cross_over_operator(father, mother, rnd);
                 genetics_circle.check_function(sons.first);
                 genetics_circle.check_function(sons.second);
-                genetics_circle.pair_permutation(rnd.Rannyu(), sons.first, rnd);
-                genetics_circle.pair_permutation(rnd.Rannyu(), sons.second, rnd);;
+                genetics_circle.mutation(probab, sons.first, rnd);
+                genetics_circle.mutation(probab, sons.second, rnd);
                 evo_circle.push_back(sons.first);
                 evo_circle.push_back(sons.second);
             }

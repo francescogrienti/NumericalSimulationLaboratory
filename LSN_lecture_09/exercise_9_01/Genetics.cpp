@@ -17,22 +17,6 @@ Genetics::Genetics() {}
 Genetics::~Genetics() {}
 // Default destructor, does not perform any action
 
-//Set the probability for the mutation operators
-void Genetics::setProbabilities(std::vector<double> prob) {
-    probabilities.resize(5);
-    probabilities[0] = prob[0]; //Pair probability
-    probabilities[1] = prob[1]; //Shift probability
-    probabilities[2] = prob[2]; //M-probability
-    probabilities[3] = prob[3]; //Inverse probability
-    probabilities[4] = prob[4]; //Cross-over probability
-}
-
-//Get the probability for the mutation operators
-vector<double> Genetics::getProbabilities() {
-    return probabilities;
-
-}
-
 void Genetics::setCitiesPath(int n) {
     n_cities = n;
     return;
@@ -144,7 +128,7 @@ void Genetics::sort_paths(std::vector<vector<int>> &population) {
 }
 
 void Genetics::pair_permutation(double prob, vector<int> &labels, Random &rnd) {
-    if (prob < probabilities[0]) {
+    if (rnd.Rannyu() < prob) {
         //Generation of two random integer numbers to select the pair indeces to be muted
         int n_1 = int(rnd.Rannyu(1., 34.));
         int n_2 = int(rnd.Rannyu(1., 34.));
@@ -163,7 +147,7 @@ vector<int> Genetics::selection_operator(const vector<vector<int>> &population, 
 
 //Shift operator
 void Genetics::shift_operator(double prob, vector<int> &labels, int N_elem, int shift, Random &rnd) {
-    if (prob < probabilities[0]) {
+    if (rnd.Rannyu() < prob) {
         vector<int> labels_elem(N_elem, 0);
         vector<int> last_labels(shift, 0);
         int n_1 = int(rnd.Rannyu(2., 20.));
@@ -180,13 +164,12 @@ void Genetics::shift_operator(double prob, vector<int> &labels, int N_elem, int 
             labels[n_1 + shift + i] = labels_elem[i];
         }
     }
-
     return;
 }
 
 //M-permutation
 void Genetics::m_permutation(double prob, vector<int> &labels, int n, Random &rnd) {
-    if (prob < probabilities[2]) {
+    if (rnd.Rannyu() < prob) {
         int len = labels.size();
 
         if (len < 2 * n) {
@@ -211,7 +194,7 @@ void Genetics::m_permutation(double prob, vector<int> &labels, int n, Random &rn
 
 //Inverse operator
 void Genetics::inverse_operator(double prob, vector<int> &labels, int n, Random &rnd) {
-    if (prob < probabilities[3]) {
+    if (rnd.Rannyu() < prob) {
         int len = labels.size();
         int start = int(rnd.Rannyu(2., 20.));
 
@@ -231,7 +214,6 @@ void Genetics::inverse_operator(double prob, vector<int> &labels, int n, Random 
             end--;
         }
     }
-
     return;
 }
 
@@ -298,11 +280,15 @@ double Genetics::getCityCoordinate(int i) {
 }
 
 
-void Genetics::mutation(Random &rnd) {
+void Genetics::mutation(vector<double> probabilities, vector<int> labels, Random &rnd) {
     double r = rnd.Rannyu();
-    if (r >= 0. && r <= 0.025) {
-    } else if (r >= 0.025 && r <= 0.050 ) {
-    } else if (r >= 0.050 && r <= 0.075) {
+    if (r >= 0. && r <= 0.25) {
+        pair_permutation(probabilities[0], labels, rnd);
+    } else if (r >= 0.25 && r <= 0.50) {
+        m_permutation(probabilities[1], labels, int(rnd.Rannyu(1, 6)), rnd);
+    } else if (r >= 0.50 && r <= 0.75) {
+        inverse_operator(probabilities[2], labels, int(rnd.Rannyu(1, 6)), rnd);
     } else {
+        shift_operator(probabilities[3], labels, int(rnd.Rannyu(1, 4)), int(rnd.Rannyu(1, 3)), rnd);
     }
 }

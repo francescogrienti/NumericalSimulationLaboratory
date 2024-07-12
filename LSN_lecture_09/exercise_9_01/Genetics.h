@@ -21,19 +21,12 @@ private:
     Path path;
     int n_cities;
     int pop_size;
-    vector<double> probabilities;
 public:
     // Default constructor
     Genetics();
 
     // Destructor
     ~Genetics();
-
-    //Set the probability for the mutation operators
-    void setProbabilities(std::vector<double> prob);
-
-    //Get the probability for the mutation operators
-    vector<double> getProbabilities();
 
     //Set number of cities in the path
     void setCitiesPath(int n);
@@ -72,7 +65,7 @@ public:
     void inverse_operator(double prob, vector<int> &labels, int n, Random &rnd);
 
     //Function for the mutation
-    void mutation(Random &rnd);
+    void mutation(vector<double> probabilities, vector<int> labels, Random &rnd);
 
     //Computing distances
     double compute_best_path(vector<int> &labels, double r);

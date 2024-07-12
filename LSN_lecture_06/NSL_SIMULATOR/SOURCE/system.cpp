@@ -875,7 +875,6 @@ void System::measure() { // Measure properties
     }
 
 
-    //ERRORE NEL CALCOLO, PRINTA GLI STESSI VALORI
     // SPECIFIC HEAT /////////////////////////////////////////////////////////////
     if (_measure_cv) {
         double s_i, s_j;
