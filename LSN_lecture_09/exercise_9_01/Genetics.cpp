@@ -95,8 +95,8 @@ void Genetics::sort_paths(std::vector<vector<int>> &population) {
     vector<double> path_length(population.size(), 0.0);
 
     // Compute the distances of the various paths
-    for (int i = 0; i < population.size(); ++i) {
-        for (int j = 0; j < n_cities; ++j) {
+    for (int i = 0; i < population.size(); i++) {
+        for (int j = 0; j < n_cities; j++) {
             path_length[i] += path.L1_norm(path.getCity(population[i][j]), path.getCity(population[i][j + 1]), r);
         }
     }
@@ -140,8 +140,7 @@ void Genetics::pair_permutation(double prob, vector<int> &labels, Random &rnd) {
 
 //Selection operator
 vector<int> Genetics::selection_operator(const vector<vector<int>> &population, Random &rnd, int p) {
-    double s = rnd.Rannyu();
-    int j = int(population.size() * pow(s, p));
+    int j = int(population.size() * pow(rnd.Rannyu(), p));
     return population[j];
 }
 
@@ -181,7 +180,7 @@ void Genetics::m_permutation(double prob, vector<int> &labels, int n, Random &rn
         int index2;
         do {
             index2 = int(rnd.Rannyu(1., 20.));
-        } while (index1 == index2);
+        } while (index2 <= index1 + n);
 
         // Scambia gli elementi dei due sotto-array
         for (int i = 0; i < n; ++i) {
