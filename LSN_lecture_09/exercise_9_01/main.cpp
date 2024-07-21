@@ -48,9 +48,9 @@ int main(int argc, char *argv[]) {
     Random rnd;
     Genetics genetics_circle;
     Genetics genetics_square;
-    int pop_size = 1000;
+    int pop_size = 500;
     int n_cities = 34;
-    int n_generations = 100;
+    int n_generations = 500;
 
     vector<int> best_path(n_cities + 1, 0);
     vector<int> father(n_cities + 1, 0);
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     vector<vector<int>> first_pop_square(pop_size, vector<int>(n_cities + 1, 0));
     vector<vector<int>> evo_square(pop_size, vector<int>(n_cities + 1, 0));
     double r = 1.;
-    vector<double> probab = {0.02, 0.02, 0.02, 0.02, 0.9};
+    vector<double> probab = {0.09, 0.09, 0.09, 0.09, 0.7};
     vector<int> seed(4, 0);
     int p1 = 0;
     int p2 = 0;
@@ -81,13 +81,15 @@ int main(int argc, char *argv[]) {
     ofstream WriteResults1;
     WriteResults1.open("best_path_circle_coordinates.dat");
 
-    //SISTEMARE, C'È PROBLEMA NELLA DIMENSIONE DELLA POPOLAZIONE EVOLUTA
+
     for (int i = 0; i < n_generations; i++) {
         genetics_circle.sort_paths(first_pop_circle);
         int p = 0;
         for (int k = 0; k < pop_size / 2; k++) {
-            father = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
-            mother = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
+            do {
+                father = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
+                mother = genetics_circle.selection_operator(first_pop_circle, rnd, 3);
+            } while (father == mother);
             if (rnd.Rannyu() < probab[4]) {
                 sons = genetics_circle.cross_over_operator(father, mother, rnd);
                 genetics_circle.check_function(sons.first);
@@ -102,28 +104,7 @@ int main(int argc, char *argv[]) {
             }
             p += 2;
         }
-        /*
         genetics_circle.sort_paths(evo_circle);
-        best_path = genetics_circle.selection_operator(evo_circle, rnd, 3);
-
-        evo_circle[pop_size - 1] = best_path;
-        genetics_circle.sort_paths(evo_circle);
-        best_path = genetics_circle.selection_operator(evo_circle, rnd, 3);
-        genetics_circle.shift_operator(rnd.Rannyu(), best_path, int(rnd.Rannyu(1, 4)), int(rnd.Rannyu(1, 3)), rnd);
-        genetics_circle.check_function(best_path);
-        evo_circle[pop_size - 1] = best_path;
-        genetics_circle.sort_paths(evo_circle);
-        best_path = genetics_circle.selection_operator(evo_circle, rnd, 3);
-        genetics_circle.m_permutation(rnd.Rannyu(), best_path, int(rnd.Rannyu(1, 6)), rnd);
-        genetics_circle.check_function(best_path);
-        evo_circle[pop_size - 1] = best_path;
-        genetics_circle.sort_paths(evo_circle);
-        best_path = genetics_circle.selection_operator(evo_circle, rnd, 3);
-        genetics_circle.inverse_operator(rnd.Rannyu(), best_path, int(rnd.Rannyu(1, 6)), rnd);
-        genetics_circle.check_function(best_path);
-        evo_circle[pop_size - 1] = best_path;
-        genetics_circle.sort_paths(evo_circle);
-        */
         first_pop_circle = evo_circle;
 
         if (WriteResults.is_open()) {

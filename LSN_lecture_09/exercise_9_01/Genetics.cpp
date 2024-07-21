@@ -130,17 +130,18 @@ void Genetics::sort_paths(std::vector<vector<int>> &population) {
 void Genetics::pair_permutation(double prob, vector<int> &labels, Random &rnd) {
     if (rnd.Rannyu() < prob) {
         //Generation of two random integer numbers to select the pair indeces to be muted
-        int n_1 = int(rnd.Rannyu(1., 34.));
-        int n_2 = int(rnd.Rannyu(1., 34.));
+        int n_1 = int(rnd.Rannyu(1., n_cities));
+        int n_2 = int(rnd.Rannyu(1., n_cities));
+        while (n_1 == n_2);
         swap(labels[n_1], labels[n_2]);
     }
-
     return;
 }
 
 //Selection operator
 vector<int> Genetics::selection_operator(const vector<vector<int>> &population, Random &rnd, int p) {
-    int j = int(population.size() * pow(rnd.Rannyu(), p));
+    double r = rnd.Rannyu();
+    int j = int(population.size() * pow(r, p));
     return population[j];
 }
 
@@ -169,49 +170,24 @@ void Genetics::shift_operator(double prob, vector<int> &labels, int N_elem, int 
 //M-permutation
 void Genetics::m_permutation(double prob, vector<int> &labels, int n, Random &rnd) {
     if (rnd.Rannyu() < prob) {
-        int len = labels.size();
-
-        if (len < 2 * n) {
-            std::cerr << "Array too small to contain two subarrays of length " << n << std::endl;
-            return;
+        int m = rnd.Rannyu(2, n_cities / 2);
+        int start1 = rnd.Rannyu(1, n_cities - 2 * m);
+        int start2 = rnd.Rannyu(1, n_cities - m);
+        while (abs(start1 - start2) < m) {
+            start2 = rnd.Rannyu(1, n_cities - m);
         }
-
-        int index1 = int(rnd.Rannyu(2., 20.));
-        int index2;
-        do {
-            index2 = int(rnd.Rannyu(1., 20.));
-        } while (index2 <= index1 + n);
-
-        // Scambia gli elementi dei due sotto-array
-        for (int i = 0; i < n; ++i) {
-            std::swap(labels[index1 + i], labels[index2 + i]);
+        for (int i = 0; i < m; ++i) {
+            swap(labels[start1 + i], labels[start2 + i]);
         }
     }
-
     return;
 }
-
 //Inverse operator
 void Genetics::inverse_operator(double prob, vector<int> &labels, int n, Random &rnd) {
     if (rnd.Rannyu() < prob) {
-        int len = labels.size();
-        int start = int(rnd.Rannyu(2., 20.));
-
-        if (len < start + n) {
-            std::cerr << "Array too small to contain a subarray of length " << n << " starting at index " << start
-                      << std::endl;
-            return;
-        }
-
-        // Identifica l'indice di fine del sotto-array da invertire
-        int end = start + n - 1;
-
-        // Inverte il sotto-array
-        while (start < end) {
-            std::swap(labels[start], labels[end]);
-            start++;
-            end--;
-        }
+        int m = int(rnd.Rannyu(2, n_cities));
+        int start = int(rnd.Rannyu(1, n_cities - m));
+        reverse(labels.begin() + start, labels.begin() + start + m);
     }
     return;
 }
@@ -291,3 +267,4 @@ void Genetics::mutation(vector<double> probabilities, vector<int> labels, Random
         shift_operator(probabilities[3], labels, int(rnd.Rannyu(1, 4)), int(rnd.Rannyu(1, 3)), rnd);
     }
 }
+
