@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
     }
 
     //Printing the coordinates of the best path in (x,y) cartesian coordinates
-    for (int k = 0; k <= n_cities - 1; k++) {
+    for (int k = 0; k <= n_cities ; k++) {
         if (WriteResults1.is_open()) {
             if (type == "circle") {
                 WriteResults1 << r * cos(evolution.getCityCoordinate(first_population[0][k])) << " "
