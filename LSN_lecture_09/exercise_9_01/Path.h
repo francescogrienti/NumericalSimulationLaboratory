@@ -7,6 +7,7 @@
 
 #include "City.h"
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -26,10 +27,13 @@ public:
     City getCity(int i);
 
     //Function for computing the distance between cities (using L-1 norm)
-    double L1_norm(City city_1, City city_2, double r);
+    double L1_norm(City city_1, City city_2, double r, string type);
 
-    //Method for setting the vector of cities in the path
+    //Method for setting the vector of cities in the path (Circle)
     void setCity(int label, double coordinate, int i);
+
+    //Method for setting the vector of cities in the path (Square)
+    void setCity(int label, double x_1, double x_2, int i);
 
     //Method for getting the vector of labels
     std::vector<int> getLabels();

@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include "City.h"
+#include <vector>
 
 
 using namespace std;
@@ -23,6 +24,11 @@ double City::getCoordinate() {
     return angular_coordinate;
 }
 
+std::vector<double> City::getSquareCoordinates() {
+    vector<double> coordinates = {x, y};
+    return coordinates;
+}
+
 //Setter methods
 void City::setLabel(int label) {
     city_label = label;
@@ -34,4 +40,9 @@ void City::setCoordinate(double coordinate) {
     return;
 }
 
+void City::setSquareCoordinates(double x_1, double x_2) {
+    this->x = x_1;
+    this->y = x_2;
+    return;
+}
 
