@@ -35,18 +35,22 @@ Random initialize(Random rnd, vector<int> seed, int p1, int p2, const std::strin
     if (Primes.is_open()) {
         if (rank == 0) {
             Primes >> p1 >> p2;
+            cout << p1 << " " << p2 << endl;
         } else if (rank == 1) {
             int linesToSkip = 1;  // Numero di righe da saltare
             skipLines(Primes, linesToSkip);
             Primes >> p1 >> p2;
+            cout << p1 << " " << p2 << endl;
         } else if (rank == 2) {
             int linesToSkip = 2;  // Numero di righe da saltare
             skipLines(Primes, linesToSkip);
             Primes >> p1 >> p2;
+            cout << p1 << " " << p2 << endl;
         } else if (rank == 3) {
             int linesToSkip = 3;  // Numero di righe da saltare
             skipLines(Primes, linesToSkip);
             Primes >> p1 >> p2;
+            cout << p1 << " " << p2 << endl;
         }
     } else cerr << "PROBLEM: Unable to open Primes" << endl;
     Primes.close();
@@ -105,6 +109,8 @@ int main(int argc, char *argv[]) {
     int p1 = 0;
     int p2 = 0;
     rnd = initialize(rnd, seed, p1, p2, "Primes", "seed.in", rank);
+
+    cout << "Sono il nodo " << rank << " dei " << size << " che hai utilizzato!" << endl;
 
     //Setting
     evolution.setPopSize(pop_size);

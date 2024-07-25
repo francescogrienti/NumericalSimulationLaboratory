@@ -1,6 +1,7 @@
-CC = g++
+CC = mpicxx
 CFLAGS = -O3 --std=c++11 -I/usr/lib/x86_64-linux-gnu/openmpi/include
-AFLAGS = -larmadillo -L/usr/lib/x86_64-linux-gnu -lmpi -lmpi_cxx
+AFLAGS = -larmadillo -L/usr/lib/x86_64-linux-gnu
+NP = 4  # Numero di processi MPI
 
 all: main.exe
 
@@ -21,6 +22,9 @@ Path.o : Path.cpp Path.h City.h
 
 random.o : random.cpp random.h
 	$(CC) -c random.cpp -o random.o $(CFLAGS)
+
+run: main.exe
+	mpiexec --use-hwthread-cpus -np $(NP) ./main.exe square
 
 clean :
 	rm *.o main.exe seed.out
