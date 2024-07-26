@@ -24,7 +24,7 @@ void Path::initialize_path(int n) {
 
 //Getter methods
 City Path::getCity(int i) {
-    return path[i];
+    return path[i - 1];
 }
 
 

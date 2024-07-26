@@ -24,7 +24,7 @@ random.o : random.cpp random.h
 	$(CC) -c random.cpp -o random.o $(CFLAGS)
 
 run: main.exe
-	mpiexec --use-hwthread-cpus -np $(NP) ./main.exe square
+	mpiexec --use-hwthread-cpus -np $(NP) ./main.exe
 
 clean :
 	rm *.o main.exe seed.out

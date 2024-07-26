@@ -28,31 +28,29 @@ void Genetics::setPopSize(int n) {
     return;
 }
 
-//Initialize the map -- circle
-void Genetics::initialize_path(Random &rnd, string type) {
-    if (type == "circle" ){
-        vector<double> coordinates(n_cities, 0.);
-        vector<int> labels(n_cities, 0);
-        for (int k = 0; k < n_cities; k++) {
-            labels[k] = k + 1;
-            coordinates[k] = rnd.Rannyu(0., 2 * M_PI);
-        }
-        path.initialize_path(n_cities);
-        for (int k = 0; k < n_cities; k++) {
-            path.setCity(labels[k], coordinates[k], k);
-        }
-    } else if (type == "square"){
-        vector<vector<double>> coordinates(n_cities, vector<double>(2, 0.));
-        vector<int> labels(n_cities, 0);
-        for (int k = 0; k < n_cities; k++) {
-            labels[k] = k + 1;
-            coordinates[k][0] = rnd.Rannyu(-1., 1.);
-            coordinates[k][1] = rnd.Rannyu(-1., 1.);
-        }
-        path.initialize_path(n_cities);
-        for (int k = 0; k < n_cities; k++) {
-            path.setCity(labels[k], coordinates[k][0], coordinates[k][1], k);
-        }
+//Initialize the map
+void Genetics::initialize_path(string filename) {
+    vector<vector<double>> coordinates;
+    vector<int> labels(n_cities, 0);
+    for (int k = 0; k < n_cities; k++) {
+        labels[k] = k + 1;
+    }
+
+    std::ifstream inputFile(filename);
+    if (!inputFile) {
+        std::cerr << "Unable to open file";
+        return; // return with error code
+    }
+
+    double value1, value2;
+    while (inputFile >> value1 >> value2) {
+        std::vector<double> row = {value1, value2};
+        coordinates.push_back(row);
+    }
+    inputFile.close();
+    path.initialize_path(n_cities);
+    for (int k = 0; k < n_cities; k++) {
+        path.setCity(labels[k], coordinates[k][0], coordinates[k][1], k);
     }
     return;
 }
@@ -69,11 +67,9 @@ vector<vector<int>> Genetics::first_pop(Random &rnd) {
             population[i][j + 1] = j + 2;
         }
     }
-
     for (int i = 0; i < pop_size; i++) {
         random_shuffle(population[i].begin() + 1, population[i].end() - 1);
     }
-
     return population;
 }
 
@@ -88,14 +84,13 @@ bool Genetics::check_function(std::vector<int> &labels) {
     return true;
 }
 
-void Genetics::sort_paths(std::vector<vector<int>> &population, string type) {
-    const double r = 1.0;
+void Genetics::sort_paths(std::vector<vector<int>> &population) {
     vector<double> path_length(population.size(), 0.0);
 
     // Compute the distances of the various paths
     for (int i = 0; i < population.size(); i++) {
         for (int j = 0; j < n_cities; j++) {
-            path_length[i] += path.L1_norm(path.getCity(population[i][j]), path.getCity(population[i][j + 1]), r, type);
+            path_length[i] += path.L1_norm(path.getCity(population[i][j]), path.getCity(population[i][j + 1]));
         }
     }
 
@@ -148,7 +143,7 @@ void Genetics::shift_operator(double prob, vector<int> &labels, int N_elem, int 
     if (rnd.Rannyu() < prob) {
         vector<int> labels_elem(N_elem, 0);
         vector<int> last_labels(shift, 0);
-        int n_1 = int(rnd.Rannyu(2., 20.));
+        int n_1 = int(rnd.Rannyu(2., 70.));
         for (int i = 0; i < N_elem; i++) {
             labels_elem[i] = labels[n_1 + i];
         }
@@ -231,31 +226,26 @@ Genetics::cross_over_operator(vector<int> &parent_1, vector<int> &parent_2, Rand
 }
 
 //Computing distances
-double Genetics::compute_best_path(vector<int> &labels, double r, string type) {
+double Genetics::compute_best_path(vector<int> &labels) {
     double path_length = 0.;
     for (int j = 0; j <= n_cities - 1; j++) {
-        path_length += path.L1_norm(path.getCity(labels[j]), path.getCity(labels[j + 1]), r, type);
+        path_length += path.L1_norm(path.getCity(labels[j]), path.getCity(labels[j + 1]));
     }
     return path_length;
 }
 
 //Computing average of the best half of the population
-double Genetics::compute_half_best_path(vector<vector<int>> &population, double r, string type) {
+double Genetics::compute_half_best_path(vector<vector<int>> &population) {
     double sum_l = 0.;
     for (int i = 0; i < pop_size / 2; i++) {
-        sum_l += compute_best_path(population[i], r, type);
+        sum_l += compute_best_path(population[i]);
     }
     return sum_l / (pop_size / 2);
 }
 
 //Get coordinates of the city
-double Genetics::getCityCoordinate(int i) {
-    return path.getCity(i).getCoordinate();
-}
-
-//Get coordinates of the city
-vector<double> Genetics::getCitySquareCoordinates(int i) {
-    return path.getCity(i).getSquareCoordinates();
+vector<double> Genetics::getProvinceCoordinates(int i) {
+    return path.getCity(i).getProvinceCoordinates();
 }
 
 

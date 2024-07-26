@@ -20,11 +20,8 @@ int City::getLabel() {
     return city_label;
 }
 
-double City::getCoordinate() {
-    return angular_coordinate;
-}
 
-std::vector<double> City::getSquareCoordinates() {
+std::vector<double> City::getProvinceCoordinates() {
     vector<double> coordinates = {x, y};
     return coordinates;
 }
@@ -35,12 +32,7 @@ void City::setLabel(int label) {
     return;
 }
 
-void City::setCoordinate(double coordinate) {
-    angular_coordinate = coordinate;
-    return;
-}
-
-void City::setSquareCoordinates(double x_1, double x_2) {
+void City::setProvinceCoordinates(double x_1, double x_2) {
     this->x = x_1;
     this->y = x_2;
     return;

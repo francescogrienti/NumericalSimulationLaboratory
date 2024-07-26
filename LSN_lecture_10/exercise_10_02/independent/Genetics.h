@@ -35,7 +35,7 @@ public:
     void setPopSize(int n);
 
     //Initialize the map
-    void initialize_path(Random &rnd, string type);
+    void initialize_path(string filename);
 
     //Creation of the first population
     vector<vector<int>> first_pop(Random &rnd);
@@ -44,7 +44,7 @@ public:
     bool check_function(std::vector<int> &labels);
 
     //Function sorting the population
-    void sort_paths(std::vector<vector<int>> &population, string type);
+    void sort_paths(std::vector<vector<int>> &population);
 
     //Selection function
     int selection_operator(vector<vector<int>> &population, Random &rnd, int p);
@@ -62,19 +62,16 @@ public:
     void inverse_operator(double prob, vector<int> &labels, Random &rnd);
 
     //Computing distances
-    double compute_best_path(vector<int> &labels, double r, string type);
+    double compute_best_path(vector<int> &labels);
 
     //Computing average of the best half of the population
-    double compute_half_best_path(vector<vector<int>> &population, double r, string type);
+    double compute_half_best_path(vector<vector<int>> &population);
 
     //Cross-over operator
     pair<vector<int>, vector<int>> cross_over_operator(vector<int> &parent_1, vector<int> &parent_2, Random &rnd);
 
     //Get coordinates of the city
-    double getCityCoordinate(int i);
-
-    //Get coordinates of the city
-    std::vector<double> getCitySquareCoordinates(int i);
+    std::vector<double> getProvinceCoordinates(int i);
 };
 
 
