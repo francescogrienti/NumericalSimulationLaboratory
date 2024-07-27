@@ -22,20 +22,14 @@ public:
     //Method for getting the label of the city
     int getLabel();
 
-    //Method for getting the angular coordinate of the city
-    double getCoordinate();
-
     //Method for getting the coordinates of the city in the square
-    std::vector<double> getSquareCoordinates();
+    std::vector<double> getProvinceCoordinates();
 
     //Method for setting the label of the city
     void setLabel(int label);
 
     //Method for setting the angular coordinate of the city
-    void setCoordinate(double coordinate);
-
-    //Method for setting the angular coordinate of the city
-    void setSquareCoordinates(double x_1, double x_2);
+    void setProvinceCoordinates(double x_1, double x_2);
 };
 
 
