@@ -14,7 +14,6 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <iostream>
 #include "random.h"
 #include <vector>
-#include <cmath>
 #include <algorithm>
 
 
@@ -81,12 +80,12 @@ int main(int argc, char *argv[]) {
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Status stat;
+    MPI_Status stat1, stat2;
 
     //Initializing variables
     Random rnd;
     Genetics evolution;
-    int pop_size = 1200;
+    int pop_size = 1500;
     int n_cities = 110;
     int n_generations = 1000;
     vector<int> father(n_cities + 1, 0);
@@ -120,7 +119,7 @@ int main(int argc, char *argv[]) {
     ofstream WriteResults1;
     WriteResults1.open("best_path_" + to_string(rank) + "_coordinates.dat");
 
-    //Running of the genetic algorithm
+    //Running the genetic algorithm
     for (int i = 0; i < n_generations; i++) {
         evolution.sort_paths(first_population);
         for (int k = 0; k < pop_size / 2; k++) {
@@ -130,7 +129,6 @@ int main(int argc, char *argv[]) {
                 f = evolution.selection_operator(first_population, rnd, 3);
                 m = evolution.selection_operator(first_population, rnd, 3);
             } while (f == m);
-
             father = first_population[f];
             mother = first_population[m];
             if (rnd.Rannyu() < probab[4]) {
@@ -166,38 +164,38 @@ int main(int argc, char *argv[]) {
                 MPI_Send(&message[0], n_cities + 1, MPI_INTEGER, ranks[0], itag1,
                          MPI_COMM_WORLD);
                 MPI_Recv(&message2[0], n_cities + 1, MPI_INTEGER, ranks[0], itag2, MPI_COMM_WORLD,
-                         &stat);
+                         &stat2);
             } else if (rank == ranks[0]) {
                 MPI_Send(&message2[0], n_cities + 1, MPI_INTEGER, ranks[1], itag2,
                          MPI_COMM_WORLD);
                 MPI_Recv(&message[0], n_cities + 1, MPI_INTEGER, ranks[1], itag1, MPI_COMM_WORLD,
-                         &stat);
+                         &stat1);
             }
             // Sostituisco gli individui locali con quelli ricevuti
             if (rank == ranks[1]) {
-                for (int j = 0; j <= n_cities; j++) evo_population[0][j] = message2[j];
+                for (int j = 0; j <= n_cities; j++) {
+                    evo_population[0][j] = message2[j];
+                }
             } else if (rank == ranks[0]) {
-                for (int j = 0; j <= n_cities; j++) evo_population[0][j] = message[j];
+                for (int j = 0; j <= n_cities; j++) {
+                    evo_population[0][j] = message[j];
+                }
             }
-            evolution.sort_paths(evo_population);
         }
-
         first_population = evo_population;
         if (WriteResults.is_open()) {
             WriteResults << i << " " << evolution.compute_best_path(first_population[0]) << " "
                          << evolution.compute_half_best_path(first_population) << " " << "\t"
                          << endl;
         } else cerr << "PROBLEM: Unable to open random.out" << endl;
-
-        //Printing the coordinates of the best path in (x,y) cartesian coordinates
-        for (int k = 0; k <= n_cities; k++) {
-            if (WriteResults1.is_open()) {
-                WriteResults1 << evolution.getProvinceCoordinates(first_population[0][k])[0] << " "
-                              << evolution.getProvinceCoordinates(first_population[0][k])[1] << " " << "\t"
-                              << endl;
-            } else cerr << "PROBLEM: Unable to open random.out" << endl;
-        }
-
+    }
+    //Printing the coordinates of the best path in (x,y) cartesian coordinates
+    for (int k = 0; k <= n_cities; k++) {
+        if (WriteResults1.is_open()) {
+            WriteResults1 << evolution.getProvinceCoordinates(first_population[0][k])[0] << " "
+                          << evolution.getProvinceCoordinates(first_population[0][k])[1] << " " << "\t"
+                          << endl;
+        } else cerr << "PROBLEM: Unable to open random.out" << endl;
     }
     rnd.SaveSeed();
     MPI_Finalize();

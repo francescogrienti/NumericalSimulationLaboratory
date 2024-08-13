@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
     //Initializing variables
     Random rnd;
     Genetics evolution;
-    int pop_size = 1000;
+    int pop_size = 1500;
     int n_cities = 110;
-    int n_generations = 600;
+    int n_generations = 1000;
     vector<int> father(n_cities + 1, 0);
     vector<int> mother(n_cities + 1, 0);
     pair<vector<int>, vector<int>> sons;
@@ -154,7 +154,6 @@ int main(int argc, char *argv[]) {
                          << endl;
         } else cerr << "PROBLEM: Unable to open random.out" << endl;
     }
-
     //Printing the coordinates of the best path in (x,y) cartesian coordinates
     for (int k = 0; k <= n_cities; k++) {
         if (WriteResults1.is_open()) {
