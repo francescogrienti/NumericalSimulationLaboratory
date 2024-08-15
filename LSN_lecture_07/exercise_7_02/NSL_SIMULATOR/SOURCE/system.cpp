@@ -26,23 +26,11 @@ using namespace std;
 using namespace arma;
 
 void System::step(string phase) { // Perform a simulation step
-    if (_restart) {
-        if (_sim_type == 0) this->Verlet();  // Perform a MD step
-        else
-            for (int i = 0; i < _npart; i++)
-                this->move(int(_rnd.Rannyu() * _npart), phase); // Perform a MC step on a randomly choosen particle
-        _nattempts += _npart; //update number of attempts performed on the system
-    }
-    return;
-}
-
-void System::step_restart(string phase) { // Perform a simulation step
     if (_sim_type == 0) this->Verlet();  // Perform a MD step
     else
         for (int i = 0; i < _npart; i++)
             this->move(int(_rnd.Rannyu() * _npart), phase); // Perform a MC step on a randomly choosen particle
     _nattempts += _npart; //update number of attempts performed on the system
-
     return;
 }
 
@@ -727,23 +715,12 @@ void System::measure(string phase) { // Measure properties
     coutf.open("../OUTPUT/OUTPUT_" + phase + "/acceptance.dat", ios::app);
     if (_nattempts > 0) fraction = double(_naccepted) / double(_nattempts);
     else fraction = 0.0;
-    coutf<< setw(12) << fraction << endl;
+    coutf << setw(12) << fraction << endl;
     coutf.close();
 
     return;
 }
 
-void System::measure_temp() {
-    double kenergy_temp = 0.0; // temporary accumulator for kinetic energy
-    if (_measure_kenergy) {
-        for (int i = 0; i < _npart; i++)
-            kenergy_temp += 0.5 * dot(_particle(i).getvelocity(), _particle(i).getvelocity());
-        kenergy_temp /= double(_npart);
-    }
-    if ((2.0 / 3.0) * kenergy_temp == _desired_temp) {
-        _restart = true;
-    }
-}
 
 void System::averages(int blk, string phase) {
 

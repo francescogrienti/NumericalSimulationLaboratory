@@ -76,7 +76,6 @@ public: // Function declarations
   void initialize_velocities();// Initialize particle velocities
   void initialize_velocities(string phase, string sim_type);// Initialize particle velocities
   void step(string phase);                // Perform a simulation step
-  void step_restart(string phase);                // Perform a simulation step
   void block_reset(int blk, string phase, string sim_type);  // Reset block averages
   void measure();             // Measure properties of the system
   void measure_temp();

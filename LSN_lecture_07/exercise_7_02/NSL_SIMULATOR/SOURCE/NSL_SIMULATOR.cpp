@@ -26,25 +26,17 @@ int main(int argc, char *argv[]) {
     // Convert the argument to an integer
     string phase = argv[1];
 
-    //AGGIUNGERE DEGLI STEP PER EQUILIBRARE!!!!!
-    bool breaking = false;
+    int eq_steps = 1000;
     int nconf = 1;
     System SYS;
     SYS.initialize(phase);
     SYS.initialize_properties(phase);
     SYS.block_reset(0, phase);
 
-    for (int i = 0; i < SYS.get_nbl() && !breaking; i++) { //loop over blocks
-        for (int j = 0; j < SYS.get_nsteps() && !breaking; j++) { //loop over steps in a block
-            if (!SYS.get_restart()) {
-                breaking = true;
-                SYS.write_configuration(phase);
-            } else {
-                SYS.step(phase);
-                SYS.measure_temp();
-            }
-        }
+    for (int i = 0; i < eq_steps; i++) { //equilibration steps
+        SYS.step(phase);
     }
+    SYS.write_configuration(phase);
 
     //RESTART THE SIMULATION
     SYS.block_reset(0, phase);
@@ -52,7 +44,7 @@ int main(int argc, char *argv[]) {
     SYS.initialize_velocities(phase);
     for (int i = 0; i < SYS.get_nbl(); i++) { //loop over blocks
         for (int j = 0; j < SYS.get_nsteps(); j++) { //loop over steps in a block
-            SYS.step_restart(phase);
+            SYS.step(phase);
             SYS.measure(phase);
             if (j % 10 == 0) {
 //              SYS.write_XYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"!
