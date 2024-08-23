@@ -29,36 +29,71 @@ int main(int argc, char *argv[]) {
     string phase = argv[1];
     string sim_type = argv[2];
 
-    int eq_steps = 1000;
-    int nconf = 1;
-    System SYS;
-    SYS.initialize(phase, sim_type);
-    SYS.initialize_properties(phase, sim_type);
-    SYS.block_reset(0, phase, sim_type);
+    if (sim_type == "NVT") {
+        int eq_steps = 1000;
+        int nconf = 1;
+        System SYS;
+        SYS.initialize(phase, sim_type);
+        SYS.initialize_properties(phase, sim_type);
+        SYS.block_reset(0, phase, sim_type);
 
-    for (int i = 0; i < eq_steps; i++) { //equilibration steps
-        SYS.step(phase);
-    }
-    SYS.write_configuration(phase, sim_type);
-
-    //RESTART THE SIMULATION
-    SYS.block_reset(0, phase, sim_type);
-    SYS.read_configuration(phase, sim_type);
-    SYS.initialize_velocities(phase, sim_type);
-    for (int i = 0; i < SYS.get_nbl(); i++) { //loop over blocks
-        for (int j = 0; j < SYS.get_nsteps(); j++) { //loop over steps in a block
+        for (int i = 0; i < eq_steps; i++) { //equilibration steps
             SYS.step(phase);
-            SYS.measure();
-            if (j % 10 == 0) {
-//              SYS.write_XYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"!
-                nconf++;
-            }
         }
-        SYS.averages(i + 1, phase, sim_type);
-        SYS.block_reset(i + 1, phase, sim_type);
-    }
+        SYS.write_configuration(phase, sim_type);
 
-    SYS.finalize(phase, sim_type);
+        //RESTART THE SIMULATION
+        SYS.block_reset(0, phase, sim_type);
+        SYS.read_configuration(phase, sim_type);
+        SYS.initialize_velocities(phase, sim_type);
+        for (int i = 0; i < SYS.get_nbl(); i++) { //loop over blocks
+            for (int j = 0; j < SYS.get_nsteps(); j++) { //loop over steps in a block
+                SYS.step(phase);
+                SYS.measure();
+                if (j % 10 == 0) {
+//              SYS.write_XYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"!
+                    nconf++;
+                }
+            }
+            SYS.averages(i + 1, phase, sim_type);
+            SYS.block_reset(i + 1, phase, sim_type);
+        }
+
+        SYS.finalize(phase, sim_type);
+
+    } else if (sim_type == "NVE") {
+        int eq_steps = 5000;
+        int nconf = 1;
+        System SYS;
+        SYS.initialize(phase, sim_type);
+        SYS.initialize_properties(phase, sim_type);
+        SYS.block_reset(0, phase, sim_type);
+
+        for (int i = 0; i < eq_steps; i++) { //equilibration steps
+            SYS.step(phase);
+        }
+        SYS.write_configuration(phase, sim_type);
+
+        //RESTART THE SIMULATION
+        SYS.block_reset(0, phase, sim_type);
+        SYS.read_configuration(phase, sim_type);
+        SYS.initialize_velocities(phase, sim_type);
+        for (int i = 0; i < SYS.get_nbl(); i++) { //loop over blocks
+            for (int j = 0; j < SYS.get_nsteps(); j++) { //loop over steps in a block
+                SYS.step(phase);
+                SYS.measure();
+                if (j % 10 == 0) {
+//              SYS.write_XYZ(nconf); //Write actual configuration in XYZ format //Commented to avoid "filesystem full"!
+                    nconf++;
+                }
+            }
+            SYS.averages(i + 1, phase, sim_type);
+            SYS.block_reset(i + 1, phase, sim_type);
+        }
+
+        SYS.finalize(phase, sim_type);
+
+    }
 
     return 0;
 }
