@@ -16,7 +16,7 @@ void writeOnFile(vector<double> average, vector<double> error, string filename) 
     WriteResults.open(filename);
     if (WriteResults.is_open()) {
         for (int i = 0; i < (int) (average.size()); i++) {
-            WriteResults << average[i] << " " << error[i] << " " << "\t" << endl;
+            WriteResults << sqrt(average[i]) << " " << error[i] / (2 * sqrt(average[i])) << " " << "\t" << endl;
         }
     } else cerr << "PROBLEM: Unable to open random.out" << endl;
     WriteResults.close();

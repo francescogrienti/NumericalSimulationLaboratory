@@ -19,14 +19,16 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
     Random rnd;
-    const int M = 10000; //Number of throws
-    const int n = 3; //Possible directions (both positive and negative)
-    const int N = 100; //Number of blocks
-    const int L = M / N; //Number of throws per block;
-    const int a = 1; //Lattice step
+    int M = 10000; //Number of throws
+    int n = 3; //Possible directions (both positive and negative)
+    int N = 100; //Number of blocks
+    int L = M / N; //Number of throws per block;
+    int a = 1; //Lattice step
     tuple<vector<double>, vector<double>> results;
-    tuple<vector<vector<double>>, vector<int>> discrete_case;
-    tuple<vector<vector<double>>, vector<int>> continuum_case;
+    tuple<vector<vector<double>>, vector<double>> discrete_case(vector<vector<double>>(N, vector<double>(L, 0.)),
+                                                                vector<double>(n, 0.));
+    tuple<vector<vector<double>>, vector<double>> continuum_case(vector<vector<double>>(N, vector<double>(L, 0.)),
+                                                                 vector<double>(n, 0.));
     vector<int> seed(4, 0);
     int p1 = 0;
     int p2 = 0;
@@ -40,15 +42,15 @@ int main(int argc, char *argv[]) {
             get<1>(discrete_case)[1] = 0;
             get<1>(discrete_case)[2] = 0;
             for (int i = 0; i < L; i++) {
-                double r = rnd.Rannyu(-1, 1);
+                double r = 2 * rnd.Rannyu() - 1;
                 if (r < 0) {
                     get<1>(discrete_case)[(int) ((-1) * r * n)] -= a;
                 } else if (r > 0) {
                     get<1>(discrete_case)[(int) (r * n)] += a;
                 }
-                get<0>(discrete_case)[k][i] += sqrt(
+                get<0>(discrete_case)[k][i] +=
                         (pow(get<1>(discrete_case)[0], 2) + pow(get<1>(discrete_case)[1], 2) +
-                         pow(get<1>(discrete_case)[2], 2)));
+                         pow(get<1>(discrete_case)[2], 2));
             }
         }
     }
@@ -62,14 +64,14 @@ int main(int argc, char *argv[]) {
             get<1>(continuum_case)[1] = 0;
             get<1>(continuum_case)[2] = 0;
             for (int i = 0; i < L; i++) {
-                double theta = rnd.Rannyu(0, M_PI);
-                double phi = rnd.Rannyu(0, 2 * M_PI);
+                double theta = acos(1 - 2 * rnd.Rannyu());
+                double phi = 2 * M_PI * rnd.Rannyu();
                 get<1>(continuum_case)[0] += sin(theta) * sin(phi);
                 get<1>(continuum_case)[1] += sin(theta) * cos(phi);
                 get<1>(continuum_case)[2] += cos(theta);
-                get<0>(continuum_case)[k][i] += sqrt(
+                get<0>(continuum_case)[k][i] +=
                         (pow(get<1>(continuum_case)[0], 2) + pow(get<1>(continuum_case)[1], 2) +
-                         pow(get<1>(continuum_case)[2], 2)));
+                         pow(get<1>(continuum_case)[2], 2));
             }
         }
     }
