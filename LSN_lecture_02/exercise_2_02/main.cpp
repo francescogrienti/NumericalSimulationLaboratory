@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
             get<1>(continuum_case)[1] = 0;
             get<1>(continuum_case)[2] = 0;
             for (int i = 0; i < L; i++) {
-                double theta = acos(1 - 2 * rnd.Rannyu());
-                double phi = 2 * M_PI * rnd.Rannyu();
+                double theta = rnd.Rannyu(0, M_PI);
+                double phi = rnd.Rannyu(0, 2 * M_PI);
                 get<1>(continuum_case)[0] += sin(theta) * sin(phi);
                 get<1>(continuum_case)[1] += sin(theta) * cos(phi);
                 get<1>(continuum_case)[2] += cos(theta);
