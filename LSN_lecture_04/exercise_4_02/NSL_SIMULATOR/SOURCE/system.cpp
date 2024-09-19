@@ -726,9 +726,6 @@ void System::measure_temp(string phase) {
         coutf << (2.0 / 3.0) * kenergy_temp << endl;
     }
     coutf.close();
-    if ((2.0 / 3.0) * kenergy_temp == _desired_temp) {
-        _restart = true;
-    }
 }
 
 void System::averages(int blk, string phase) {
