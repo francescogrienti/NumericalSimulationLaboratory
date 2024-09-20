@@ -207,4 +207,36 @@ Metropolis_Uniform(vector<double> x, Random rnd, double metropolis_step, double 
 
 }
 
+void Metropolis_Uniform_eq(vector<double> x, Random rnd, double metropolis_step, double (*pdf_function)(vector<double>),
+                   int blocks, int steps, string filename) {
+
+    double radius = 0.;
+    double acceptance = 0.;
+    double r = 0.;
+    vector<double> x_k(3, 0.);
+    ofstream WriteResults;
+    WriteResults.open(filename);
+    if (WriteResults.is_open()) {
+        for (int i = 0; i < blocks; i++) {
+            radius = 0.;
+            for (int j = 0; j < (steps / blocks); j++) {
+                x_k[0] = rnd.Rannyu(x[0] - metropolis_step, x[0] + metropolis_step);
+                x_k[1] = rnd.Rannyu(x[1] - metropolis_step, x[1] + metropolis_step);
+                x_k[2] = rnd.Rannyu(x[2] - metropolis_step, x[2] + metropolis_step);
+                acceptance = min(1., pow(pdf_function(x_k), 2) / pow(pdf_function(x), 2));
+                r = rnd.Rannyu();
+                if (r <= acceptance) {
+                    x[0] = x_k[0];
+                    x[1] = x_k[1];
+                    x[2] = x_k[2];
+                }
+                radius = sqrt(pow(x[0], 2) + pow(x[1], 2) + pow(x[2], 2));
+                WriteResults << radius << " " << x[0] << " " << x[1] << " " << x[2] << " " << "\t" << endl;
+            }
+        }
+    } else cerr << "PROBLEM: Unable to open random.out" << endl;
+    WriteResults.close();
+    return;
+
+}
 

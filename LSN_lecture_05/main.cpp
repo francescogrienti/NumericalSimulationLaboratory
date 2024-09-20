@@ -20,10 +20,14 @@ int main(int argc, char *argv[]) {
     Random rnd;
     int M = 1000000; //Throws
     int N = 200; //Blocks
+    int M_eq = 7000;
+    int n_blocks_eq = 1;
     vector<double> x_0_gauss_GS(3, 1.);
     vector<double> x_0_gauss_ES(3, 3.);
     vector<double> x_0_uniform_GS(3, 1.);
     vector<double> x_0_uniform_ES(3, 3.);
+    vector<double> x_0_eq_GS(3, 40.);
+    vector<double> x_0_eq_ES(3, 60.);
     tuple<vector<double>, vector<double>> Gauss_GS;
     tuple<vector<double>, vector<double>> Gauss_ES;
     tuple<vector<double>, vector<double>> Uniform_GS;
@@ -37,7 +41,17 @@ int main(int argc, char *argv[]) {
     int p2 = 0;
     rnd = initialize(rnd, seed, p1, p2, "Primes", "seed.in");
 
+    //EQUILIBRATION
 
+    Metropolis_Uniform_eq(x_0_eq_GS, rnd, metropolis_step_uniform_GS, pdf_wave_function_GS, n_blocks_eq,
+                                    M_eq,
+                                    "results_eq_GS.dat");
+    Metropolis_Uniform_eq(x_0_eq_ES, rnd, metropolis_step_uniform_ES, pdf_wave_function_ES, n_blocks_eq,
+                                    M_eq,
+                                    "results_eq_ES.dat");
+
+
+    //SIMULATION
     Gauss_GS = Metropolis_Gauss(x_0_gauss_GS, rnd, metropolis_step_gauss_GS, pdf_wave_function_GS, N, M,
                                 "results_xyz_gauss_GS.dat");
     Gauss_ES = Metropolis_Gauss(x_0_gauss_ES, rnd, metropolis_step_gauss_ES, pdf_wave_function_ES, N, M,

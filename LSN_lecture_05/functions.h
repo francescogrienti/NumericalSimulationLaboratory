@@ -41,6 +41,9 @@ std::tuple<std::vector<double>, std::vector<double>>
 Metropolis_Uniform(std::vector<double> x, Random rnd, double metropolis_step,
                    double (*pdf_function)(std::vector<double>), int blocks, int steps, std::string filename);
 
+void Metropolis_Uniform_eq(std::vector<double> x, Random rnd, double metropolis_step,
+                   double (*pdf_function)(std::vector<double>), int blocks, int steps, std::string filename);
+
 //Probability density function for the ground state
 double pdf_wave_function_GS(std::vector<double> x);
 
