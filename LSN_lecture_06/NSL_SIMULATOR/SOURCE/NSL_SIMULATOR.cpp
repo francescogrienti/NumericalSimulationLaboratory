@@ -55,10 +55,8 @@ int main(int argc, char *argv[]) {
     string method = argv[1];
 
     //System SYS;
-    equilibration(method);
+    //equilibration(method);
 
-
-    /*
     int nconf = 1;
     System SYS;
     SYS.initialize(method);
@@ -78,7 +76,6 @@ int main(int argc, char *argv[]) {
         SYS.block_reset(i + 1, method);
     }
     SYS.finalize(method);
-    */
 
     return 0;
 }

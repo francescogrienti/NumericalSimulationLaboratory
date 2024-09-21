@@ -5,6 +5,6 @@ SIDE=      3.68403     3.68403     3.68403
 R_CUT= 0
 DELTA= 0
 NBLOCKS= 20
-NSTEPS= 20000
+NSTEPS= 100000
 Reading input completed!
 System initialized!
