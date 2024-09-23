@@ -26,6 +26,8 @@ int main(int argc, char *argv[]) {
     // Convert the argument to an integer
     string phase = argv[1];
 
+
+    //Equilibration phase
     int eq_steps = 1000;
     int nconf = 1;
     System SYS;
