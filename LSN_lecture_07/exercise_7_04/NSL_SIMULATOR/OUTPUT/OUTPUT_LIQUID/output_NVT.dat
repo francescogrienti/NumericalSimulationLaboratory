@@ -4,8 +4,8 @@ DESIRED_TEMPERATURE= 1.1
 NPART= 108
 SIDE=      5.12993     5.12993     5.12993
 R_CUT= 2.5
-DELTA= 0.12
-NBLOCKS= 200
+DELTA= 0.0005
+NBLOCKS= 250
 NSTEPS= 2000
 Reading input completed!
 System initialized!
@@ -210,4 +210,54 @@ Block completed: 197
 Block completed: 198
 Block completed: 199
 Block completed: 200
+Block completed: 201
+Block completed: 202
+Block completed: 203
+Block completed: 204
+Block completed: 205
+Block completed: 206
+Block completed: 207
+Block completed: 208
+Block completed: 209
+Block completed: 210
+Block completed: 211
+Block completed: 212
+Block completed: 213
+Block completed: 214
+Block completed: 215
+Block completed: 216
+Block completed: 217
+Block completed: 218
+Block completed: 219
+Block completed: 220
+Block completed: 221
+Block completed: 222
+Block completed: 223
+Block completed: 224
+Block completed: 225
+Block completed: 226
+Block completed: 227
+Block completed: 228
+Block completed: 229
+Block completed: 230
+Block completed: 231
+Block completed: 232
+Block completed: 233
+Block completed: 234
+Block completed: 235
+Block completed: 236
+Block completed: 237
+Block completed: 238
+Block completed: 239
+Block completed: 240
+Block completed: 241
+Block completed: 242
+Block completed: 243
+Block completed: 244
+Block completed: 245
+Block completed: 246
+Block completed: 247
+Block completed: 248
+Block completed: 249
+Block completed: 250
 Simulation completed!
