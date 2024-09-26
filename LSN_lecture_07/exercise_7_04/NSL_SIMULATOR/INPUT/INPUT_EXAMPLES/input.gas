@@ -5,7 +5,7 @@ DESIRED_TEMP           1.2
 NPART                  108
 RHO                    0.05
 R_CUT                  5.0
-DELTA                  0.0005
+DELTA                  6.0
 NBLOCKS                200
 NSTEPS                 3000
 
