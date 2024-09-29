@@ -8,5 +8,3 @@ In each folder there is a notebook with the assigned exercises done and commente
 + TensorFlow/Keras
 + C++
 + GNU debugger
-
-*_Go check my page out!_*
