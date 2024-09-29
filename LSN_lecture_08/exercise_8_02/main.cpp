@@ -18,62 +18,73 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
     Random rnd;
-    int SA_steps = 10000; //Throws
+    int M = 10000; //Throws
+    int SA_steps = 1000;
     int N = 100; //Blocks
     double x = 1.; //Starting point
-    double x_new = 0.;
-    const int n_iter = 10;
-    double metropolis_step = 2.9;
-    double mu = 1.;
-    double sigma = 1.;
-    double T_start = 0.1;
-    double delta_mu = 0.1;
-    double delta_sigma = 0.1;
-    double delta_T = 0.0005;
-    double mu_new = 0.;
-    double sigma_new = 0.;
+    double metropolis_step = 2.8;
+    double mu = 4.;
+    double sigma = 4.;
+    double mu_best = 0.;
+    double sigma_best = 0.;
+    double H_min = 0.;
+    double beta = 1.;
     vector<int> seed(4, 0);
     int p1 = 0;
     int p2 = 0;
     rnd = initialize(rnd, seed, p1, p2, "Primes", "seed.in");
 
+    tuple<vector<double>, vector<double>> metropolis_old;
+    tuple<vector<double>, vector<double>> metropolis_new;
+    tuple<vector<double>, vector<double>> H_old;
+    tuple<vector<double>, vector<double>> H_new;
+    tuple<vector<double>, vector<double>> hamiltonian_GS;
 
     ofstream WriteResults;
     WriteResults.open("results_H_vs_SA_steps.dat");
-    ofstream WriteResults1;
-    WriteResults1.open("results_param_vs_SA_steps.dat");
-
-    for (double T = T_start; T >= delta_T; T -= delta_T) {
-        tuple<vector<double>, vector<double>> metropolis_old;
-        tuple<vector<double>, vector<double>> metropolis_new;
-        tuple<vector<double>, vector<double>> H_old;
-        tuple<vector<double>, vector<double>> H_new;
-        double beta = 1. / T;
-        for (int i = 0; i < n_iter; i++) {
-            metropolis_old = Metropolis_Uniform(x, rnd, metropolis_step, pdf_function, potential, kinetic_energy,
-                                                mu, sigma,
-                                                N,
-                                                SA_steps, "results_x_hamiltonian_GS.dat");
-            H_old = cumulativeAverage(get<0>(metropolis_old), get<1>(metropolis_old), "results_energy_GS.dat");
-            mu_new = fabs(mu + delta_mu * (rnd.Rannyu() - 0.5));
-            sigma_new = fabs(sigma + delta_sigma * (rnd.Rannyu() - 0.5));
-            metropolis_new = Metropolis_Uniform(x, rnd, metropolis_step, pdf_function, potential, kinetic_energy,
-                                                mu_new, sigma_new,
-                                                N,
-                                                SA_steps, "results_x_hamiltonian_GS.dat");
-            H_new = cumulativeAverage(get<0>(metropolis_new), get<1>(metropolis_new), "results_energy_GS.dat");
-            double p = 1.0;
-            if (get<0>(H_new)[N - 1] > get<0>(H_old)[N - 1])
-                p = exp(-beta * (get<0>(H_new)[N - 1] - get<0>(H_old)[N - 1]));
-            if (p >= rnd.Rannyu()) {
-                mu = mu_new;
-                sigma = sigma_new;
-            }
+    for (int i = 0; i < SA_steps; i++) {
+        double deltaSA = pow(double(beta), -0.5);
+        metropolis_old = Metropolis_Uniform(x, rnd, metropolis_step, psi_trial, potential, kinetic_energy,
+                                            mu, sigma,
+                                            N,
+                                            M);
+        H_old = cumulativeAverage(get<0>(metropolis_old), get<1>(metropolis_old));
+        double mu_new = rnd.Rannyu(mu - deltaSA, mu + deltaSA);
+        double sigma_new = rnd.Rannyu(sigma - deltaSA, sigma + deltaSA);
+        metropolis_new = Metropolis_Uniform(x, rnd, metropolis_step, psi_trial, potential, kinetic_energy,
+                                            mu_new, sigma_new,
+                                            N,
+                                            M);
+        H_new = cumulativeAverage(get<0>(metropolis_new), get<1>(metropolis_new));
+        double p = 1.0;
+        if (get<0>(H_new)[N - 1] > get<0>(H_old)[N - 1])
+            p = exp((-1.) * beta * (get<0>(H_new)[N - 1] - get<0>(H_old)[N - 1]));
+        double rand = rnd.Rannyu();
+        if (rand <= p) {
+            mu = mu_new;
+            sigma = sigma_new;
+            H_old = H_new;
         }
         if (WriteResults.is_open()) {
-            WriteResults << get<0>(H_old)[N - 1] << " " << get<1>(H_old)[N - 1] << " " << "\t" << endl;
+            WriteResults << get<0>(H_old)[N - 1] << " " << get<1>(H_old)[N - 1] << " " << mu << " " << sigma << " "
+                         << beta << " " << "\t" << endl;
         } else cerr << "PROBLEM: Unable to open random.out" << endl;
+        beta += 0.5;
+        if (get<0>(H_old)[N - 1] < H_min) {
+            mu_best = mu;
+            sigma_best = sigma;
+            H_min = get<0>(H_old)[N - 1];
+        }
     }
+
+    cout << mu_best << " " << sigma_best << " " << H_min << endl;
+
+    //Evaluation of the ground state energy with the optimal parameters
+    hamiltonian_GS = Metropolis_Uniform(x, rnd, metropolis_step, psi_trial, potential, kinetic_energy, mu_best,
+                                        sigma_best, N,
+                                        M, "results_x_hamiltonian_GS.dat");
+
+    cumulativeAverage(get<0>(hamiltonian_GS), get<1>(hamiltonian_GS), "results_energy_GS.dat");
     rnd.SaveSeed();
 
 
