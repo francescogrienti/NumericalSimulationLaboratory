@@ -8,3 +8,4 @@ In each folder there is a notebook with the assigned exercises done and commente
 + TensorFlow/Keras
 + C++
 + GNU debugger
++ Jupyter Notebook
