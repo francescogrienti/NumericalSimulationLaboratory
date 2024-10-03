@@ -20,12 +20,11 @@ double kinetic_energy(double x, double mu, double sigma);
 
 double psi_trial(double x, double mu, double sigma);
 
-double pdf_function(double, double mu, double sigma);
 
 //Metropolis algorithm with Uniform extraction
 std::tuple<std::vector<double>, std::vector<double>>
-Metropolis_Uniform(double x, Random rnd, double metropolis_step,
-                   double (*pdf_function)(double x, double mu, double sigma),
+Metropolis_Uniform(double x, Random &rnd, double metropolis_step,
+                   double (*psi_trial)(double x, double mu, double sigma),
                    double (*potential)(double x),
                    double (*kinetic_energy)(double x, double mu, double sigma), double mu, double sigma, int blocks,
                    int steps,
